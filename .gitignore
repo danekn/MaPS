@@ -86,3 +86,5 @@ Thumbs.db
 *.gradle
 
 .idea/gradle.xml
+
+build/intermediates/dex-cache/cache.xml

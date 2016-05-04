@@ -119,7 +119,7 @@ public class CollectionDemoActivity extends FragmentActivity {
         @Override
         public int getCount() {
             // For this contrived example, we have a 100-object collection.
-            return 100;
+            return 3;
         }
 
         @Override
