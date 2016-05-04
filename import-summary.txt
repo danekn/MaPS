@@ -1,31 +1,14 @@
 ECLIPSE ANDROID PROJECT IMPORT SUMMARY
 ======================================
 
-Ignored Files:
---------------
-The following files were *not* copied into the new Gradle project; you
-should evaluate whether these are still needed in your project and if
-so manually move them:
-
-* .idea/
-* .idea/.name
-* .idea/EffectiveNavigation.iml
-* .idea/compiler.xml
-* .idea/copyright/
-* .idea/copyright/profiles_settings.xml
-* .idea/misc.xml
-* .idea/modules.xml
-* .idea/vcs.xml
-* .idea/workspace.xml
-
 Moved Files:
 ------------
 Android Gradle projects use a different directory structure than ADT
 Eclipse projects. Here's how the projects were restructured:
 
-* AndroidManifest.xml => app/src/main/AndroidManifest.xml
-* res/ => app/src/main/res/
-* src/ => app/src/main/java/
+* AndroidManifest.xml => app\src\main\AndroidManifest.xml
+* res\ => app\src\main\res\
+* src\ => app\src\main\java\
 
 Next Steps:
 -----------
