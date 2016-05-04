@@ -81,3 +81,8 @@ local.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.properties
+
+*.gradle
+
+.idea/gradle.xml
