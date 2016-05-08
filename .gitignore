@@ -92,3 +92,5 @@ build/intermediates/dex-cache/cache.xml
 .idea/gradle.xml
 
 build/intermediates/dex-cache/cache.xml
+.idea/gradle.xml
+*.gradle
