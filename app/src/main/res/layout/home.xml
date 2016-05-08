@@ -12,21 +12,21 @@
     android:padding="32dp" />
 
     <Button
-        android:layout_width="191dp"
+        android:layout_width="182dp"
         android:layout_height="wrap_content"
-        android:text="New Button"
+        android:text="Schiacci"
         android:id="@+id/button2"
         android:layout_gravity="bottom"
         android:layout_weight="0.79" />
 
     <Button
-        android:layout_width="227dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="New Button"
+        android:text="Schiaccilo"
         android:id="@+id/button"
         android:layout_gravity="right|bottom"
         android:layout_weight="0.79"
-        android:onClick="insert"/>
+        android:onClick="HomeFragment.insert"/>
 
 
 </FrameLayout>

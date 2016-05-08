@@ -1,6 +1,6 @@
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/offers"
+    android:id="@+id/titolo_o"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
