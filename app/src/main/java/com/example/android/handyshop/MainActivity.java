@@ -17,22 +17,29 @@
 package com.example.android.handyshop;
 
 import android.app.ActionBar;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 public class MainActivity extends FragmentActivity {
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide fragments representing
-     * each object in a collection. We use a {@link android.support.v4.app.FragmentStatePagerAdapter}
+     * The {@link PagerAdapter} that will provide fragments representing
+     * each object in a collection. We use a {@link FragmentStatePagerAdapter}
      * derivative, which will destroy and re-create fragments as needed, saving and restoring their
      * state in the process. This is important to conserve memory and is a best practice when
      * allowing navigation between objects in a potentially large collection.
@@ -40,9 +47,14 @@ public class MainActivity extends FragmentActivity {
     CollectionPagerAdapter myCollectionPagerAdapter;
 
     /**
-     * The {@link android.support.v4.view.ViewPager} that will display the object collection.
+     * The {@link ViewPager} that will display the object collection.
      */
     static ViewPager mViewPager;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,11 +77,54 @@ public class MainActivity extends FragmentActivity {
         // Set up the ViewPager, attaching the adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(myCollectionPagerAdapter);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
 
     /**
-     * A {@link android.support.v4.app.FragmentStatePagerAdapter} that returns a fragment
+     * A {@link FragmentStatePagerAdapter} that returns a fragment
      * representing an object in the collection.
      */
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
@@ -104,6 +159,7 @@ public class MainActivity extends FragmentActivity {
                     return fragment;
             }
         }
+
         @Override
         public int getCount() {
             // For this contrived example, we have a 100-object collection.
@@ -133,7 +189,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public static class HomeFragment extends Fragment{
+    public static class HomeFragment extends Fragment {
 
         public static final String ARG_OBJECT = "object";
 
@@ -142,15 +198,22 @@ public class MainActivity extends FragmentActivity {
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.home, container, false);
+            final Button button = (Button) rootView.findViewById(R.id.insert);
+            button.setOnClickListener(insert);
             ((TextView) rootView.findViewById(R.id.account)).setText("dane");
             return rootView;
         }
 
-        public static void insert(View v) {
-            System.out.println("tappooo");
+       /* private void insert() {
             mViewPager.setCurrentItem(3);
+        }*/
+        View.OnClickListener insert = new View.OnClickListener() {
+            public void onClick(View v) {
+                // do something here
+                mViewPager.setCurrentItem(3);
+            }
+        };
 
-        }
     }
 
     public static class RequestsFragment extends Fragment {
@@ -165,7 +228,6 @@ public class MainActivity extends FragmentActivity {
             ((TextView) rootView.findViewById(R.id.titolo_r)).setText("Richiedimento");
             return rootView;
         }
-
 
 
     }
@@ -184,7 +246,6 @@ public class MainActivity extends FragmentActivity {
         }
 
 
-
     }
 
     public static class InsertFragment extends Fragment {
@@ -199,7 +260,6 @@ public class MainActivity extends FragmentActivity {
             ((TextView) rootView.findViewById(R.id.titolo_i)).setText("Inserimento");
             return rootView;
         }
-
 
 
     }
