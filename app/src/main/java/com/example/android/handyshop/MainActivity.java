@@ -1,70 +1,54 @@
-/*
- * Copyright 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 package com.example.android.handyshop;
 
 import android.app.ActionBar;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-public class MainActivity extends FragmentActivity {
+import java.util.HashMap;
+import java.util.Map;
 
-    /**
-     * The {@link PagerAdapter} that will provide fragments representing
-     * each object in a collection. We use a {@link FragmentStatePagerAdapter}
-     * derivative, which will destroy and re-create fragments as needed, saving and restoring their
-     * state in the process. This is important to conserve memory and is a best practice when
-     * allowing navigation between objects in a potentially large collection.
-     */
+
+public class MainActivity extends FragmentActivity {
+    static Firebase handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
 
-    /**
-     * The {@link ViewPager} that will display the object collection.
-     */
+
     static ViewPager mViewPager;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
+
     private GoogleApiClient client;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Create an adapter that when requested, will return a fragment representing an object in
-        // the collection.
-        // 
-        // ViewPager and its adapters use support library fragments, so we must use
-        // getSupportFragmentManager.
         myCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
         // Set up action bar.
@@ -77,6 +61,24 @@ public class MainActivity extends FragmentActivity {
         // Set up the ViewPager, attaching the adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(myCollectionPagerAdapter);
+
+        //create firebase
+        Firebase.setAndroidContext(this);
+        handyShopDB=new Firebase("https://amber-torch-5366.firebaseio.com");
+        handyShopDB.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                System.out.println(snapshot.getValue());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -173,10 +175,10 @@ public class MainActivity extends FragmentActivity {
                     return "Home";
 
                 case 1:
-                    return "Offers";
+                    return "Requests";
 
                 case 2:
-                    return "Requests";
+                    return "Offers";
 
                 case 3:
                     return "Insert";
@@ -190,23 +192,27 @@ public class MainActivity extends FragmentActivity {
     }
 
     public static class HomeFragment extends Fragment {
-
+        private int UserId=0;
         public static final String ARG_OBJECT = "object";
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             View rootView = null;
+
             rootView = inflater.inflate(R.layout.home, container, false);
-            final Button button = (Button) rootView.findViewById(R.id.insert);
+            final Button button = (Button) rootView.findViewById(R.id.insert_button);
             button.setOnClickListener(insert);
             ((TextView) rootView.findViewById(R.id.account)).setText("dane");
+
+
+            final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
+            button_1.setOnClickListener(request);
+
             return rootView;
         }
 
-       /* private void insert() {
-            mViewPager.setCurrentItem(3);
-        }*/
+
         View.OnClickListener insert = new View.OnClickListener() {
             public void onClick(View v) {
                 // do something here
@@ -214,23 +220,93 @@ public class MainActivity extends FragmentActivity {
             }
         };
 
+        View.OnClickListener request = new View.OnClickListener() {
+            public void onClick(View v) {
+                Firebase ref=handyShopDB.child("requests");
+                Request req= new Request(UserId,"titolo","categoria","sottocategoria","descrizione");
+                ref.push().setValue(req);
+            }
+        };
+
+
     }
 
-    public static class RequestsFragment extends Fragment {
-
-        public static final String ARG_OBJECT = "object";
+    public static class RequestsFragment extends ListFragment {
+        public String[] requestSource;
+        public ArrayAdapter <String> adapter = null;
+        public int[] arrint={1,2,3,4,5,6};
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
-            ((TextView) rootView.findViewById(R.id.titolo_r)).setText("Richiedimento");
+
+
+            // Create an array of string to be data source of the ListFragment
+            String[] datasource={"English","French","Khmer","Japanese","Russian","Chinese"};
+            // Create ArrayAdapter object to wrap the data source
+
+             adapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_list_item_1, android.R.id.text1, datasource);
+            // Bind adapter to the ListFragment
+            setListAdapter(adapter);
+            //  Retain the ListFragment instance across Activity re-creation
+            setRetainInstance(true);
+
             return rootView;
+        }
+        @Override
+        public void onListItemClick(ListView l, View view, int position, long id){
+
+            ViewGroup viewg=(ViewGroup)view;
+            TextView tv=(TextView)viewg.findViewById(R.id.txtitem);
+            Toast.makeText(getActivity(), tv.getText().toString(), Toast.LENGTH_LONG).show();
+
         }
 
 
+        @Override
+        public void setUserVisibleHint(boolean isVisibleToUser) {
+            super.setUserVisibleHint(isVisibleToUser);
+            if (isVisibleToUser) {
+                System.out.println("daje");
+                adapter.add("dane");
+
+                adapter.notifyDataSetChanged();
+                // Get a reference to our posts
+                Firebase ref = handyShopDB.child("requests");
+
+                // Attach an listener to read the data at our posts reference
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        System.out.println("There are " + snapshot.getChildrenCount() + " Requests");
+
+                        for (DataSnapshot d: snapshot.getChildren()){
+
+                            String k = d.getKey();
+                            Request req = d.getValue(Request.class);
+
+                            //System.out.println(request.toString());
+                            System.out.println(req.getTitle() + " - " + req.getCategory());
+
+                        }
+                    }
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        System.out.println("The read failed: " + firebaseError.getMessage());
+                    }
+                });
+
+            }
+            else {  }
+        }
     }
+
+
 
     public static class OffersFragment extends Fragment {
 
@@ -263,6 +339,8 @@ public class MainActivity extends FragmentActivity {
 
 
     }
+
+
 }
 
 

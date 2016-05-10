@@ -14,16 +14,16 @@
     <Button
         android:layout_width="182dp"
         android:layout_height="wrap_content"
-        android:text="Schiacci"
-        android:id="@+id/bb"
+        android:text="Request"
+        android:id="@+id/request_button"
         android:layout_gravity="bottom"
         android:layout_weight="0.79" />
 
     <Button
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Schiaccilo"
-        android:id="@+id/insert"
+        android:text="Insert"
+        android:id="@+id/insert_button"
         android:layout_gravity="right|bottom"
         android:layout_weight="0.79"
         />
