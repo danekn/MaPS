@@ -14,11 +14,13 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.CursorAdapter;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
@@ -41,7 +43,7 @@ import java.util.Map;
 public class MainActivity extends FragmentActivity {
     static Firebase handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
-
+    static ArrayList<Map<String, String>> list=new ArrayList<Map<String, String>>();
 
     static ViewPager mViewPager;
 
@@ -235,27 +237,27 @@ public class MainActivity extends FragmentActivity {
 
     public static class RequestsFragment extends ListFragment {
         SimpleAdapter adapter=null;
-        ArrayList<Map<String, String>> list=null;
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
-            list = buildData();
+            //list = buildData();
             String[] from = { "title", "description" };
             int[] to = { R.id.firstLine, R.id.secondLine };
             adapter = new SimpleAdapter(getActivity(),list,R.layout.rowlayout,from,to);
             setListAdapter(adapter);
             return rootView;
         }
-        private ArrayList<Map<String, String>> buildData() {
+        /*private ArrayList<Map<String, String>> buildData() {
             ArrayList<Map<String, String>> list = new ArrayList<Map<String, String>>();
             list.add(putData("Android", "Mobile"));
             list.add(putData("Windows7", "Windows7"));
 
             return list;
-        }
+        }*/
 
         private HashMap<String, String> putData(String title, String description) {
             HashMap<String, String> item = new HashMap<String, String>();
@@ -308,15 +310,27 @@ public class MainActivity extends FragmentActivity {
 
     public static class OffersFragment extends Fragment {
 
-        public static final String ARG_OBJECT = "object";
-
+        SparseArray<Group> groups = new SparseArray<Group>();
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.offers, container, false);
-            ((TextView) rootView.findViewById(R.id.titolo_o)).setText("Offrimento");
+
+            createData();
+            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            MyExpandableListAdapter adapter = new MyExpandableListAdapter(getActivity(), groups);
+            listView.setAdapter(adapter);
             return rootView;
+        }
+        public void createData() {
+            for (int j = 0; j < 5; j++) {
+                Group group = new Group("Test " + j);
+                for (int i = 0; i < 5; i++) {
+                    group.children.add("Sub Item" + i);
+                }
+                groups.append(j, group);
+            }
         }
 
 

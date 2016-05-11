@@ -1,4 +1,5 @@
 
 <resources>
     <string name="app_name">Handy Shop</string>
+    <string name="hello_world">helloWorld</string>
 </resources>
