@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -232,38 +234,34 @@ public class MainActivity extends FragmentActivity {
     }
 
     public static class RequestsFragment extends ListFragment {
-        public String[] requestSource;
-        public ArrayAdapter <String> adapter = null;
-        public int[] arrint={1,2,3,4,5,6};
+        SimpleAdapter adapter=null;
+        ArrayList<Map<String, String>> list=null;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
-
-
-            // Create an array of string to be data source of the ListFragment
-            String[] datasource={"English","French","Khmer","Japanese","Russian","Chinese"};
-            // Create ArrayAdapter object to wrap the data source
-
-             adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, android.R.id.text1, datasource);
-            // Bind adapter to the ListFragment
+            list = buildData();
+            String[] from = { "title", "description" };
+            int[] to = { R.id.firstLine, R.id.secondLine };
+            adapter = new SimpleAdapter(getActivity(),list,R.layout.rowlayout,from,to);
             setListAdapter(adapter);
-            //  Retain the ListFragment instance across Activity re-creation
-            setRetainInstance(true);
-
             return rootView;
         }
-        @Override
-        public void onListItemClick(ListView l, View view, int position, long id){
+        private ArrayList<Map<String, String>> buildData() {
+            ArrayList<Map<String, String>> list = new ArrayList<Map<String, String>>();
+            list.add(putData("Android", "Mobile"));
+            list.add(putData("Windows7", "Windows7"));
 
-            ViewGroup viewg=(ViewGroup)view;
-            TextView tv=(TextView)viewg.findViewById(R.id.txtitem);
-            Toast.makeText(getActivity(), tv.getText().toString(), Toast.LENGTH_LONG).show();
+            return list;
+        }
 
+        private HashMap<String, String> putData(String title, String description) {
+            HashMap<String, String> item = new HashMap<String, String>();
+            item.put("title", title);
+            item.put("description", description);
+            return item;
         }
 
 
@@ -271,10 +269,10 @@ public class MainActivity extends FragmentActivity {
         public void setUserVisibleHint(boolean isVisibleToUser) {
             super.setUserVisibleHint(isVisibleToUser);
             if (isVisibleToUser) {
-                System.out.println("daje");
-                adapter.add("dane");
 
+                list.add(putData("dane", "cazzetto"));
                 adapter.notifyDataSetChanged();
+
                 // Get a reference to our posts
                 Firebase ref = handyShopDB.child("requests");
 
