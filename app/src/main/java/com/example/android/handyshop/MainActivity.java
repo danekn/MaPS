@@ -13,8 +13,12 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
+
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -23,6 +27,8 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity {
 
@@ -352,12 +358,79 @@ public class MainActivity extends FragmentActivity {
 
             public static final String ARG_OBJECT = "object";
 
+            View rootView = null;
+            Spinner spinner_category=null;
+            Spinner spinner_subcategory=null;
+            ArrayList<String> subcategory_choices=null;
+            ArrayAdapter<String> spinnerAdapter=null;
+
             @Override
             public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
                 Bundle args = getArguments();
-                View rootView = null;
                 rootView = inflater.inflate(R.layout.insert, container, false);
 
+                Spinner spinner = (Spinner) rootView.findViewById(R.id.category_choice);
+
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                         spinner_category = (Spinner) rootView.findViewById(R.id.category_choice);
+
+                         spinner_subcategory = (Spinner) rootView.findViewById(R.id.subcategory_choice);
+                        String text_category = spinner_category.getSelectedItem().toString();
+                        System.out.println(text_category);
+
+                        subcategory_choices = new ArrayList<>();
+
+                        switch(text_category){
+
+                            case "Services" :
+                                subcategory_choices.add("Senior Companions");
+                                subcategory_choices.add("Go to Supermarke");
+                                subcategory_choices.add("Others");
+
+                                 spinnerAdapter = new ArrayAdapter<String>(getActivity(),
+                                         android.R.layout.simple_spinner_item,subcategory_choices);
+                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                spinner_subcategory.setAdapter(spinnerAdapter);
+                                spinnerAdapter.notifyDataSetChanged();
+                                break;
+                            case "Rentals" :
+                                subcategory_choices.add("Auto/Pick UP");
+                                subcategory_choices.add("Bike");
+                                subcategory_choices.add("Moto");
+                                subcategory_choices.add("");
+
+                                spinnerAdapter = new ArrayAdapter<String>(getActivity(),
+                                        android.R.layout.simple_spinner_item,subcategory_choices);
+                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                spinner_subcategory.setAdapter(spinnerAdapter);
+                                spinnerAdapter.notifyDataSetChanged();
+                                break;
+
+                            case "Tools":
+                                subcategory_choices.add("Repairs");
+                                subcategory_choices.add("Music");
+                                subcategory_choices.add("Sport");
+                                subcategory_choices.add("Carpeteing");
+
+                                spinnerAdapter = new ArrayAdapter<String>(getActivity(),
+                                        android.R.layout.simple_spinner_item,subcategory_choices);
+                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                spinner_subcategory.setAdapter(spinnerAdapter);
+                                spinnerAdapter.notifyDataSetChanged();
+                                break;
+                            default :
+                        }
+                    }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parentView) {
+                        // your code here
+                    }
+
+                });
                 return rootView;
             }
 
