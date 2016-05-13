@@ -3,23 +3,89 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+<<<<<<< HEAD
     android:gravity="fill_vertical">
+=======
+    android:gravity="fill_vertical"
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <RadioButton
-        android:layout_width="wrap_content"
-        android:layout_height="59dp"
-        android:text="New RadioButton"
-        android:id="@+id/radioButton" />
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/titolo_i"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="128sp"
-        android:padding="32dp" />
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/title_insert"
+        android:id="@+id/title_request"
+        android:layout_weight="0.03">
 
+    </TextView>
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText"
+        android:layout_weight="0.03" />
+>>>>>>> origin/master
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/description_insert"
+        android:id="@+id/textView"
+        android:layout_weight="0.03" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/editText2"
+        android:layout_weight="0.10" />
+
+<<<<<<< HEAD
+
+=======
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/category_sub_insert"
+        android:id="@+id/editText3"
+        android:layout_weight="0.03" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/category_choice"
+        android:layout_weight="0.03"
+        android:spinnerMode="dropdown"
+        android:prompt="@string/category_prompt"
+        android:entries="@array/category_arrays"/>
+>>>>>>> origin/master
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/subcategory_insert"
+        android:id="@+id/textView2"
+        android:layout_weight="0.03" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/subcategory_choice"
+        android:layout_weight="0.03"
+        android:spinnerMode="dropdown"
+        android:prompt="@string/subcategory_prompt"
+        android:entries="@array/category_arrays"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/textView3"
+        android:layout_weight="0.03" />
 
 </LinearLayout>

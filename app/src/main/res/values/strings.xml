@@ -2,6 +2,23 @@
 <resources>
     <string name="app_name">Handy Shop</string>
     <string name="hello_world">helloWorld</string>
+<<<<<<< HEAD
     <string name="facebook_app_id">280901888910378</string>
+=======
+>>>>>>> origin/master
     <string name="profile_name">Leonardo</string>
+
+    <string name="title_insert">Title</string>
+    <string name="description_insert">Description</string>
+    <string name="category_sub_insert">Category</string>
+    <string name="subcategory_insert">Subcategory</string>
+    <string name="category_prompt">Choose a category</string>
+    <string name="subcategory_prompt">Choose a subcategory</string>
+
+    <string-array name="category_arrays">
+        <item>Rentals</item>
+        <item>Tools</item>
+        <item>Services</item>
+    </string-array>
+
 </resources>
