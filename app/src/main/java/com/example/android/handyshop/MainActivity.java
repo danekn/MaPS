@@ -1,42 +1,30 @@
 package com.example.android.handyshop;
 
 import android.app.ActionBar;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.CursorAdapter;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class MainActivity extends FragmentActivity {
     static Firebase handyShopDB;
@@ -83,6 +71,9 @@ public class MainActivity extends FragmentActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        if (savedInstanceState == null) {
+           mViewPager.setCurrentItem(1);
+        }
     }
 
     @Override
@@ -142,20 +133,24 @@ public class MainActivity extends FragmentActivity {
             //Bundle args=null;
             switch (i) {
                 case 0:
+                    fragment = new ActivityFragment();
+
+                    return fragment;
+                case 1:
                     fragment = new HomeFragment();
                     //args = new Bundle();
                     //args.putInt(HomeFragment.ARG_OBJECT, i);
                     //fragment.setArguments(args);
                     return fragment;
-                case 1:
+                case 2:
                     fragment = new RequestsFragment();
 
                     return fragment;
-                case 2:
+                case 3:
                     fragment = new OffersFragment();
 
                     return fragment;
-                case 3:
+                case 4:
                     fragment = new InsertFragment();
                     return fragment;
                 default:
@@ -166,22 +161,25 @@ public class MainActivity extends FragmentActivity {
         @Override
         public int getCount() {
             // For this contrived example, we have a 100-object collection.
-            return 4;
+            return 5;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Home";
+                    return "Activity";
 
                 case 1:
-                    return "Requests";
+                    return "Home";
 
                 case 2:
-                    return "Offers";
+                    return "Requests";
 
                 case 3:
+                    return "Offers";
+
+                case 4:
                     return "Insert";
 
                 default:
@@ -217,7 +215,7 @@ public class MainActivity extends FragmentActivity {
         View.OnClickListener insert = new View.OnClickListener() {
             public void onClick(View v) {
                 // do something here
-                mViewPager.setCurrentItem(3);
+                mViewPager.setCurrentItem(4);
             }
         };
 
@@ -263,13 +261,34 @@ public class MainActivity extends FragmentActivity {
         public void setUserVisibleHint(boolean isVisibleToUser) {
             super.setUserVisibleHint(isVisibleToUser);
             if (isVisibleToUser) {
-                Group group = new Group("Dane");
-                group.children.add("cazzetto");
-                requestsList.append(requestsList.size(), group);
-                adapter.notifyDataSetChanged();
+
+                Firebase ref = handyShopDB.child("requests");
+                Query queryRef = ref.orderByChild("userId").startAt(10);
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        System.out.println("ciao");
+                        for (DataSnapshot d : snapshot.getChildren()) {
+
+                            String k = d.getKey();
+                            Request req = d.getValue(Request.class);
+
+                            //System.out.println(request.toString());
+                            System.out.println(req.getTitle() + " - " + req.getCategory());
+                            Group group = new Group(req.getCategory());
+                            group.children.add(req.getDescription());
+                            requestsList.append(requestsList.size(), group);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError f) {
+                    }
+                });
 
                 // Get a reference to our posts
-                Firebase ref = handyShopDB.child("requests");
+               /* Firebase ref = handyShopDB.child("requests");
 
                 // Attach an listener to read the data at our posts reference
                 ref.addValueEventListener(new ValueEventListener() {
@@ -292,10 +311,10 @@ public class MainActivity extends FragmentActivity {
                     public void onCancelled(FirebaseError firebaseError) {
                         System.out.println("The read failed: " + firebaseError.getMessage());
                     }
-                });
+                });*/
 
             }
-            else {  }
+
         }
     }
 
@@ -348,14 +367,23 @@ public class MainActivity extends FragmentActivity {
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.insert, container, false);
-            ((TextView) rootView.findViewById(R.id.titolo_i)).setText("Inserimento");
+
             return rootView;
         }
 
 
     }
 
+    public static class ActivityFragment extends Fragment {
 
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            View rootView = null;
+            rootView = inflater.inflate(R.layout.insert, container, false);
+            return rootView;
+        }
+    }
 }
 
 

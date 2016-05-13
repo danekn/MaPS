@@ -5,6 +5,7 @@
     android:clickable="true"
     android:orientation="vertical"
     android:paddingLeft="40dp"
+    android:paddingRight="40dp"
     tools:context=".MainActivity" >
 
     <TextView
@@ -15,12 +16,12 @@
         android:gravity="center_vertical"
         android:text="@string/hello_world"
         android:textSize="14sp"
-        android:textStyle="bold" >
+        android:textStyle="italic" >
     </TextView>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
+        android:background="@android:color/holo_blue_light" />
 
 </LinearLayout>
