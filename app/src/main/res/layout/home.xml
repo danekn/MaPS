@@ -37,13 +37,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/middle_home">
-        <Button
-            android:layout_width="404dp"
-            android:layout_height="164dp"
-            android:text="Insert"
-            android:id="@+id/insert_button"
-            android:layout_gravity="right|bottom"
-            android:layout_weight="0.23" />
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp" />
     </FrameLayout>
 
     <FrameLayout
@@ -54,7 +54,7 @@
             android:layout_width="404dp"
             android:layout_height="138dp"
             android:text="Insert"
-            android:id="@+id/request_button"
+            android:id="@+id/insert_button"
             android:layout_gravity="right|bottom"
             android:layout_weight="0.23" />
     </FrameLayout>

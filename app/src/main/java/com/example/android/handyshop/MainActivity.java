@@ -1,12 +1,7 @@
 package com.example.android.handyshop;
 
 import android.app.ActionBar;
-<<<<<<< Updated upstream
-=======
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
->>>>>>> Stashed changes
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,15 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-<<<<<<< Updated upstream
-=======
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
->>>>>>> Stashed changes
-import android.widget.TextView;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -44,7 +39,7 @@ public class MainActivity extends FragmentActivity {
 
     static Firebase handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
-
+    static CallbackManager callbackManager;
     static ViewPager mViewPager;
 
     private GoogleApiClient client;
@@ -57,9 +52,6 @@ public class MainActivity extends FragmentActivity {
 
         // Set up action bar.
         final ActionBar actionBar = getActionBar();
-
-
-
 
         // Specify that the Home button should show an "Up" caret, indicating that touching the
         // button will take the user one step up in the application's hierarchy.
@@ -85,19 +77,19 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-<<<<<<< Updated upstream
+
         if (savedInstanceState == null) {
            mViewPager.setCurrentItem(1);
         }
-=======
 
-
-
->>>>>>> Stashed changes
     }
 
     @Override
@@ -227,10 +219,30 @@ public class MainActivity extends FragmentActivity {
             final Button button = (Button) rootView.findViewById(R.id.insert_button);
             button.setOnClickListener(insert);
 
+            LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
+            loginButton.setReadPermissions("email");
+            // If using in a fragment
+            loginButton.setFragment(this);
 
+            loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    // App code
+                }
 
-            final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
-            button_1.setOnClickListener(request);
+                @Override
+                public void onCancel() {
+                    // App code
+                }
+
+                @Override
+                public void onError(FacebookException exception) {
+                    // App code
+                }
+            });
+
+            /*final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
+            button_1.setOnClickListener(request);*/
 
             return rootView;
         }
