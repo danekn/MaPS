@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< Updated upstream
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="fill_vertical">
+=======
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="59dp"
+        android:text="New RadioButton"
+        android:id="@+id/radioButton" />
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/titolo_i"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="128sp"
+        android:padding="32dp" />
+
+>>>>>>> Stashed changes
 
 
 </LinearLayout>
