@@ -2,10 +2,9 @@
 <resources>
     <string name="app_name">Handy Shop</string>
     <string name="hello_world">helloWorld</string>
-<<<<<<< HEAD
+
     <string name="facebook_app_id">280901888910378</string>
-=======
->>>>>>> origin/master
+
     <string name="profile_name">Leonardo</string>
 
     <string name="title_insert">Title</string>
@@ -20,5 +19,9 @@
         <item>Tools</item>
         <item>Services</item>
     </string-array>
+
+    <string name="request_radio">Request</string>
+    <string name="offer_radio">Offer</string>
+    <string name="button_insert">Insert!</string>
 
 </resources>

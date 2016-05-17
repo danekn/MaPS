@@ -1,13 +1,13 @@
 package com.example.android.handyshop;
 
-public class Request {
+public class Announcement {
     private int userId;
     private String title;
     private String category;
     private String subCategory;
     private String description;
 
-    public Request( int userId,String title, String category,String subCategory, String description){
+    public Announcement(int userId, String title, String category, String subCategory, String description){
         this.userId=userId;
         this.title=title;
         this.category=category;
@@ -58,6 +58,6 @@ public class Request {
         this.subCategory = subCategory;
     }
 
-    public Request() {}
+    public Announcement() {}
 }
 

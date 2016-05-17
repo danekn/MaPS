@@ -3,9 +3,6 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-<<<<<<< HEAD
-    android:gravity="fill_vertical">
-=======
     android:gravity="fill_vertical"
     android:orientation="vertical"
     android:weightSum="1">
@@ -16,37 +13,35 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/title_insert"
-        android:id="@+id/title_request"
+        android:id="@+id/title_req"
         android:layout_weight="0.03">
 
     </TextView>
 
     <EditText
+        android:id="@+id/title_announcement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+
         android:layout_weight="0.03" />
->>>>>>> origin/master
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/description_insert"
-        android:id="@+id/textView"
+        android:id="@+id/ann"
         android:layout_weight="0.03" />
 
     <EditText
+        android:id="@+id/description_announcement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
         android:ems="10"
-        android:id="@+id/editText2"
         android:layout_weight="0.10" />
 
-<<<<<<< HEAD
-
-=======
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -63,7 +58,7 @@
         android:spinnerMode="dropdown"
         android:prompt="@string/category_prompt"
         android:entries="@array/category_arrays"/>
->>>>>>> origin/master
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -86,6 +81,34 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textView3"
+        android:layout_weight="0.03" />
+
+    <RadioGroup
+        android:id="@+id/radioType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/radio_request"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/request_radio"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radio_offer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offer_radio" />
+
+    </RadioGroup>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_insert"
+        android:id="@+id/button_insert_0"
+        android:layout_gravity="center_horizontal"
         android:layout_weight="0.03" />
 
 </LinearLayout>
