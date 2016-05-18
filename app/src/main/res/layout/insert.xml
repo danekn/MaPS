@@ -3,9 +3,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-<<<<<<< HEAD
-    android:gravity="fill_vertical">
-=======
+
     android:gravity="fill_vertical"
     android:orientation="vertical"
     android:weightSum="1">
@@ -26,7 +24,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/editText"
         android:layout_weight="0.03" />
->>>>>>> origin/master
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -44,9 +42,6 @@
         android:id="@+id/editText2"
         android:layout_weight="0.10" />
 
-<<<<<<< HEAD
-
-=======
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -63,7 +58,7 @@
         android:spinnerMode="dropdown"
         android:prompt="@string/category_prompt"
         android:entries="@array/category_arrays"/>
->>>>>>> origin/master
+
 
     <TextView
         android:layout_width="wrap_content"

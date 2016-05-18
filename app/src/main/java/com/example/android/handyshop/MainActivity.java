@@ -2,36 +2,46 @@ package com.example.android.handyshop;
 
 import android.app.ActionBar;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-<<<<<<< HEAD
 
+
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.firebase.client.ChildEventListener;
-=======
+
 import android.widget.Spinner;
 
->>>>>>> origin/master
+
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -41,7 +51,11 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends FragmentActivity {
 
@@ -49,7 +63,9 @@ public class MainActivity extends FragmentActivity {
     static Firebase handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
     static CallbackManager callbackManager;
-    static ViewPager mViewPager;
+    static CustomViewPager mViewPager;
+    static AccessToken accessToken = null;
+    static AccessTokenTracker accessTokenTracker=null;
 
     private GoogleApiClient client;
 
@@ -57,15 +73,14 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         myCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
-        final ActionBar actionBar = getActionBar();
-<<<<<<< HEAD
+
+
 
         // Specify that the Home button should show an "Up" caret, indicating that touching the
         // button will take the user one step up in the application's hierarchy.
-=======
->>>>>>> origin/master
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+
+       getActionBar().hide();
+        mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(myCollectionPagerAdapter);
         Firebase.setAndroidContext(this);
         handyShopDB = new Firebase("https://amber-torch-5366.firebaseio.com");
@@ -83,65 +98,72 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-<<<<<<< HEAD
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
 
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                accessToken = currentAccessToken;
+                if(accessToken == null)mViewPager.setPagingEnabled(false);
+                else mViewPager.setPagingEnabled(true);
+            }
+        };
+        accessToken=AccessToken.getCurrentAccessToken();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-=======
->>>>>>> origin/master
+
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         if (savedInstanceState == null) {
             mViewPager.setCurrentItem(1);
         }
-}
-        @Override
-        public void onStart () {
-            super.onStart();
-
-            // ATTENTION: This was auto-generated to implement the App Indexing API.
-            // See https://g.co/AppIndexing/AndroidStudio for more information.
-            client.connect();
-            Action viewAction = Action.newAction(
-                    Action.TYPE_VIEW, // TODO: choose an action type.
-                    "Main Page", // TODO: Define a title for the content shown.
-                    // TODO: If you have web page content that matches this app activity's content,
-                    // make sure this auto-generated web page URL is correct.
-                    // Otherwise, set the URL to null.
-                    Uri.parse("http://host/path"),
-                    // TODO: Make sure this auto-generated app deep link URI is correct.
-                    Uri.parse("android-app://com.example.android.handyshop/http/host/path")
-            );
-            AppIndex.AppIndexApi.start(client, viewAction);
-        }
-
-<<<<<<< HEAD
     }
-=======
-        @Override
-        public void onStop () {
-            super.onStop();
 
-            // ATTENTION: This was auto-generated to implement the App Indexing API.
-            // See https://g.co/AppIndexing/AndroidStudio for more information.
-            Action viewAction = Action.newAction(
-                    Action.TYPE_VIEW, // TODO: choose an action type.
-                    "Main Page", // TODO: Define a title for the content shown.
-                    // TODO: If you have web page content that matches this app activity's content,
-                    // make sure this auto-generated web page URL is correct.
-                    // Otherwise, set the URL to null.
-                    Uri.parse("http://host/path"),
-                    // TODO: Make sure this auto-generated app deep link URI is correct.
-                    Uri.parse("android-app://com.example.android.handyshop/http/host/path")
-            );
-            AppIndex.AppIndexApi.end(client, viewAction);
-            client.disconnect();
-        }
->>>>>>> origin/master
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+
 
 
 
@@ -212,57 +234,125 @@ public class MainActivity extends FragmentActivity {
                 }
 
             }
+
         }
-
-
-
-            LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
-            loginButton.setReadPermissions("email");
-            // If using in a fragment
-            loginButton.setFragment(this);
-
-            loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-                @Override
-                public void onSuccess(LoginResult loginResult) {
-                    // App code
-                }
-
-<<<<<<< HEAD
-                @Override
-                public void onCancel() {
-                    // App code
-                }
-
-                @Override
-                public void onError(FacebookException exception) {
-                    // App code
-                }
-            });
 
             /*final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
             button_1.setOnClickListener(request);*/
-=======
+
+         @Override
+        protected void onActivityResult(int requestCode, int resultCode, Intent data)
+        {
+            super.onActivityResult(requestCode, resultCode, data);
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+            System.out.println("login");
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            
+            accessTokenTracker.stopTracking();
+            System.out.println("logout");
+        }
+
         public static class HomeFragment extends Fragment {
-            private int UserId = 0;
-            public static final String ARG_OBJECT = "object";
+            String id=null;
+            String name=null;
+            String email=null;
+
 
             @Override
             public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
                 Bundle args = getArguments();
                 View rootView = null;
->>>>>>> origin/master
 
-                rootView = inflater.inflate(R.layout.home, container, false);
-                final Button button = (Button) rootView.findViewById(R.id.insert_button);
-                button.setOnClickListener(insert);
+                    rootView = inflater.inflate(R.layout.home, container, false);
+                final Button insert_button = (Button) rootView.findViewById(R.id.insert_button);
+                insert_button.setOnClickListener(insert);
+                LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
+                loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
+                loginButton.setFragment(this);
+                    loginButton.setOnClickListener(login);
+
+                if(accessToken == null){mViewPager.setPagingEnabled(false);
+                }
+                else mViewPager.setPagingEnabled(true);
+                    LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                        @Override
+                        public void onSuccess(LoginResult loginResult) {
+                            GraphRequest request = GraphRequest.newMeRequest(
+                                    loginResult.getAccessToken(),
+                                    new GraphRequest.GraphJSONObjectCallback() {
+                                        @Override
+                                        public void onCompleted(JSONObject object, GraphResponse response) {
+                                            Log.v("LoginActivity", response.toString());
+
+                                            // Application code
+                                            try {
+                                                  email = object.getString("email");
+                                                  id = object.getString("id");
+                                                  name = object.getString("name");
+                                            }
+                                            catch(JSONException e){}
+                                            final Firebase ref = handyShopDB.child("users");
+
+                                            Query queryRef = ref.orderByChild("userId").equalTo(id);
+
+                                            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot snapshot) {
+                                                    if (snapshot.getChildrenCount() == 0) {
+                                                        User usr = new User(id, name, email);
+                                                        ref.push().setValue(usr);
+
+                                                    }
+                                                    else
+                                                        System.out.println("Utente gia presente");
+                                                }
+                                                @Override
+                                                public void onCancelled(FirebaseError f) {
+                                                }
+                                            });
+                                        }
+                                    });
+                            Bundle parameters = new Bundle();
+                            parameters.putString("fields", "id,name,email");
+                            request.setParameters(parameters);
+                            request.executeAsync();
+
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            // App code
+                        }
+
+                        @Override
+                        public void onError(FacebookException exception) {
+                            // App code
+                        }
+                    });
 
 
-                final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
-                button_1.setOnClickListener(request);
 
                 return rootView;
             }
+            @Override
+            public void setUserVisibleHint(boolean isVisibleToUser) {
+                super.setUserVisibleHint(isVisibleToUser);
+                if (isVisibleToUser) {
 
+                }
+            }
+
+            View.OnClickListener login = new View.OnClickListener() {
+                public void onClick(View v) {
+                    // do something here
+                    if (accessToken == null)
+                        LoginManager.getInstance().logInWithReadPermissions(getActivity(), Arrays.asList("public_profile"));
+                }
+            };
 
             View.OnClickListener insert = new View.OnClickListener() {
                 public void onClick(View v) {
@@ -274,7 +364,7 @@ public class MainActivity extends FragmentActivity {
             View.OnClickListener request = new View.OnClickListener() {
                 public void onClick(View v) {
                     Firebase ref = handyShopDB.child("requests");
-                    Request req = new Request(UserId, "titolo", "categoria", "sottocategoria", "descrizione");
+                    Request req = new Request(0, "titolo", "categoria", "sottocategoria", "descrizione");
                     ref.push().setValue(req);
                 }
             };
@@ -316,11 +406,12 @@ public class MainActivity extends FragmentActivity {
                 if (isVisibleToUser) {
 
                     Firebase ref = handyShopDB.child("requests");
+
                     Query queryRef = ref.orderByChild("userId").startAt(10);
                     queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
-                            System.out.println("ciao");
+                            if(snapshot.getChildrenCount() == 0) System.out.println("nullo");
                             for (DataSnapshot d : snapshot.getChildren()) {
 
                                 String k = d.getKey();
@@ -507,5 +598,6 @@ public class MainActivity extends FragmentActivity {
             }
         }
     }
+
 
 
