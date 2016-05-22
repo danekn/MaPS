@@ -3,8 +3,13 @@ package com.example.android.handyshop;
 import android.app.ActionBar;
 
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -56,8 +61,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements LocationListener {
 
 
     static Firebase handyShopDB;
@@ -66,6 +72,8 @@ public class MainActivity extends FragmentActivity {
     static CustomViewPager mViewPager;
     static AccessToken accessToken = null;
     static AccessTokenTracker accessTokenTracker=null;
+    private LocationManager locationManager;
+    private List<String> enabledProviders;
 
     private GoogleApiClient client;
 
@@ -75,7 +83,7 @@ public class MainActivity extends FragmentActivity {
         myCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
 
-
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         // Specify that the Home button should show an "Up" caret, indicating that touching the
         // button will take the user one step up in the application's hierarchy.
 
@@ -132,6 +140,48 @@ public class MainActivity extends FragmentActivity {
         if (savedInstanceState == null) {
             mViewPager.setCurrentItem(1);
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        StringBuffer stringBuffer = new StringBuffer();
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        enabledProviders = locationManager.getProviders(criteria, true);
+        if (enabledProviders.isEmpty()) {
+            System.out.println("");
+        } else {
+            for (String enabledProvider : enabledProviders) {
+                stringBuffer.append(enabledProvider).append(" ");
+                locationManager.requestSingleUpdate(enabledProvider, this, null);
+            }
+            System.out.println(stringBuffer);
+        }
+    }
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
+    @Override
+    public void onLocationChanged(Location location)
+    {
+        System.out.println(location.getLatitude());
+        System.out.println(location.getLongitude());
+        System.out.println(location.getProvider());
+        System.out.println(location.getAccuracy());
+
+    }
+    @Override
+    public void onProviderDisabled(String provider){ }
+    @Override
+    public void onProviderEnabled(String provider){ }
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) { }
+    public void onChangeLocationProvidersSettingsClick(View view)
+    {
+        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
     }
 
     @Override
