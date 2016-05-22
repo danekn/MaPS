@@ -1,15 +1,20 @@
 package com.example.android.handyshop;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -126,14 +131,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 else
                 {
                     mViewPager.setPagingEnabled(true);
-                    insert_button.setVisibility(View.VISIBLE);
-                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+//                    insert_button.setVisibility(View.VISIBLE);
+  //                  findViewById(R.id.header_home).setVisibility(View.VISIBLE);
                 }
             }
         };
         accessToken=AccessToken.getCurrentAccessToken();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
+
 
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
@@ -141,6 +145,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             mViewPager.setCurrentItem(1);
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -153,16 +158,23 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         } else {
             for (String enabledProvider : enabledProviders) {
                 stringBuffer.append(enabledProvider).append(" ");
-                locationManager.requestSingleUpdate(enabledProvider, this, null);
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    locationManager.requestSingleUpdate(enabledProvider, this, null);
+                }
             }
             System.out.println(stringBuffer);
         }
     }
+
     @Override
     protected void onPause()
     {
         super.onPause();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
         locationManager.removeUpdates(this);
+        }
     }
     @Override
     public void onLocationChanged(Location location)
