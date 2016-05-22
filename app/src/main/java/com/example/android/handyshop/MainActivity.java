@@ -108,8 +108,19 @@ public class MainActivity extends FragmentActivity {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 accessToken = currentAccessToken;
-                if(accessToken == null)mViewPager.setPagingEnabled(false);
-                else mViewPager.setPagingEnabled(true);
+                Button insert_button = (Button) findViewById(R.id.insert_button);
+                if(accessToken == null)
+                {
+                    mViewPager.setPagingEnabled(false);
+                    insert_button.setVisibility(View.INVISIBLE);
+                    findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
+                }
+                else
+                {
+                    mViewPager.setPagingEnabled(true);
+                    insert_button.setVisibility(View.VISIBLE);
+                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+                }
             }
         };
         accessToken=AccessToken.getCurrentAccessToken();
@@ -245,7 +256,19 @@ public class MainActivity extends FragmentActivity {
         {
             super.onActivityResult(requestCode, resultCode, data);
             callbackManager.onActivityResult(requestCode, resultCode, data);
-            System.out.println("login");
+            Button insert_button = (Button) findViewById(R.id.insert_button);
+            if(accessToken == null)
+            {
+                mViewPager.setPagingEnabled(false);
+                insert_button.setVisibility(View.INVISIBLE);
+                findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
+            }
+            else
+            {
+                mViewPager.setPagingEnabled(true);
+                insert_button.setVisibility(View.VISIBLE);
+                findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+            }
         }
 
         @Override
@@ -256,28 +279,38 @@ public class MainActivity extends FragmentActivity {
             System.out.println("logout");
         }
 
+
+
         public static class HomeFragment extends Fragment {
             String id=null;
             String name=null;
             String email=null;
-
+            Button insert_button=null;
+            View rootView = null;
 
             @Override
             public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-                Bundle args = getArguments();
-                View rootView = null;
 
-                    rootView = inflater.inflate(R.layout.home, container, false);
-                final Button insert_button = (Button) rootView.findViewById(R.id.insert_button);
+                rootView = inflater.inflate(R.layout.home, container, false);
+                insert_button = (Button) rootView.findViewById(R.id.insert_button);
                 insert_button.setOnClickListener(insert);
                 LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
                 loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
                 loginButton.setFragment(this);
-                    loginButton.setOnClickListener(login);
-
-                if(accessToken == null){mViewPager.setPagingEnabled(false);
+                loginButton.setOnClickListener(login);
+                if(accessToken == null)
+                {
+                    mViewPager.setPagingEnabled(false);
+                    insert_button.setVisibility(View.INVISIBLE);
+                    rootView.findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
                 }
-                else mViewPager.setPagingEnabled(true);
+                else
+                {
+                    mViewPager.setPagingEnabled(true);
+                    insert_button.setVisibility(View.VISIBLE);
+                    rootView.findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+                }
+
                     LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                         @Override
                         public void onSuccess(LoginResult loginResult) {
@@ -338,11 +371,16 @@ public class MainActivity extends FragmentActivity {
 
                 return rootView;
             }
+
+
             @Override
             public void setUserVisibleHint(boolean isVisibleToUser) {
                 super.setUserVisibleHint(isVisibleToUser);
                 if (isVisibleToUser) {
-
+                    System.out.println("gg");
+                   /* if(accessToken==null)
+                    insert_button.setVisibility(View.INVISIBLE);
+                    else insert_button.setVisibility(View.INVISIBLE);*/
                 }
             }
 
@@ -411,7 +449,7 @@ public class MainActivity extends FragmentActivity {
                     queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
-                            if(snapshot.getChildrenCount() == 0) System.out.println("nullo");
+                            if (snapshot.getChildrenCount() == 0) System.out.println("nullo");
                             for (DataSnapshot d : snapshot.getChildren()) {
 
                                 String k = d.getKey();
