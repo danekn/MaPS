@@ -22,7 +22,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/editTitle"
         android:layout_weight="0.03" />
 
 
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
         android:ems="10"
-        android:id="@+id/editText2"
+        android:id="@+id/editDescription"
         android:layout_weight="0.10" />
 
     <TextView
@@ -81,6 +81,14 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textView3"
+        android:layout_weight="0.03" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Button"
+        android:id="@+id/insertButton"
+        android:layout_gravity="center_horizontal"
         android:layout_weight="0.03" />
 
 </LinearLayout>

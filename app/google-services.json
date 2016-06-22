@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "269122241232",
+    "firebase_url": "https://amber-torch-5366.firebaseio.com",
+    "project_id": "amber-torch-5366",
+    "storage_bucket": "amber-torch-5366.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269122241232:android:688b796642311508",
+        "android_client_info": {
+          "package_name": "com.example.android.handyshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269122241232-cnc52ahfr2kd3v735r3nf5um82sh0p96.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "269122241232-t92u1sgef5htduvjmevrcuemniu30p7h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdSPY-6klAcuw69D2fW1xNHFePL5INY8o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

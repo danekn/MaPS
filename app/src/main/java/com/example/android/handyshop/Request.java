@@ -1,26 +1,31 @@
 package com.example.android.handyshop;
 
 public class Request {
-    private int userId;
+    private String userId;
     private String title;
     private String category;
     private String subCategory;
     private String description;
+    private double latitude;
+    private double longitude;
 
-    public Request( int userId,String title, String category,String subCategory, String description){
+    public Request(String userId,String title, String category,String subCategory, String description,double latitude,double longitude){
         this.userId=userId;
         this.title=title;
         this.category=category;
         this.subCategory=subCategory;
         this.description=description;
+        this.latitude=latitude;
+        this.longitude=longitude;
+
 
 }
 
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -52,10 +57,15 @@ public class Request {
         this.title = title;
     }
 
-
-
     public void setSubCategory(String subCategory) {
         this.subCategory = subCategory;
+    }
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public Request() {}
