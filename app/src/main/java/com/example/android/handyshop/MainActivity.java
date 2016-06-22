@@ -135,12 +135,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     mViewPager.setPagingEnabled(false);
                     if (insert_button != null)
                         insert_button.setVisibility(View.INVISIBLE);
-                    findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
+               //     findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
                 } else {
                     mViewPager.setPagingEnabled(true);
                     if(insert_button!=null)
                         insert_button.setVisibility(View.VISIBLE);
-                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+//                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
                 }
             }
         };
@@ -713,7 +713,33 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         }
     }
 
+public void sendRequest(View view) {
+
+    Spinner spinner_category = (Spinner) findViewById(R.id.category_choice);
+    Spinner spinner_subcategory = (Spinner) findViewById(R.id.subcategory_choice);
+
+    String category = spinner_category.getSelectedItem().toString();
+    String subcategory = spinner_subcategory.getSelectedItem().toString();
+
+    EditText titleEdit = (EditText) findViewById(R.id.editTitle);
+    EditText descriptionEdit = (EditText) findViewById(R.id.editDescription);
+
+    String title = titleEdit.getText().toString();
+    String description = descriptionEdit.getText().toString();
+
+    Firebase ref = handyShopDB.child("requeste");
+    Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
+    System.out.println("latitude"+req.getLatitude());
+
+    ref.push().setValue(req);
+    System.out.println(latitude);
+    System.out.println(longitude);
+
+
 }
+
+}
+
 
 
 

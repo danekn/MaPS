@@ -89,6 +89,7 @@
         android:text="New Button"
         android:id="@+id/insertButton"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.03" />
+        android:layout_weight="0.03"
+        android:onClick="sendRequest"/>
 
 </LinearLayout>
