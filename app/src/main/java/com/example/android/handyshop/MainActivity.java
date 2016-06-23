@@ -55,6 +55,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 
@@ -130,18 +131,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 accessToken = currentAccessToken;
                 System.out.println("currentAccess");
-                Button insert_button = (Button) findViewById(R.id.insert_button);
-                if (accessToken == null) {
-                    mViewPager.setPagingEnabled(false);
-                    if (insert_button != null)
-                        insert_button.setVisibility(View.INVISIBLE);
-                    findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
-                } else {
-                    mViewPager.setPagingEnabled(true);
-                    if(insert_button!=null)
-                        insert_button.setVisibility(View.VISIBLE);
-                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
-                }
+                checkIfLogged(null);
             }
         };
         accessToken = AccessToken.getCurrentAccessToken();
@@ -154,6 +144,30 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         }
     }
 
+    public void checkIfLogged(View v){
+        Button insert_button;
+        LinearLayout layout;
+        if(v!=null) {
+            insert_button = (Button) v.findViewById(R.id.insert_button);
+            layout = (LinearLayout) v.findViewById(R.id.header_home);
+        }
+        else{
+            insert_button = (Button) findViewById(R.id.insert_button);
+            layout = (LinearLayout) findViewById(R.id.header_home);
+        }
+        if (accessToken == null) {
+            mViewPager.setPagingEnabled(false);
+            if (insert_button != null) {
+                insert_button.setVisibility(View.INVISIBLE);
+                layout.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            mViewPager.setPagingEnabled(true);
+            if(insert_button!=null)
+                insert_button.setVisibility(View.VISIBLE);
+            layout.setVisibility(View.VISIBLE);
+        }
+    }
     @Override
     public void onLocationChanged(Location location) {
 
@@ -192,16 +206,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     @Override
     protected void onPause() {
         super.onPause();
-       /* if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            locationManager.removeUpdates(locListener);*/
-
     }
-
-   /* public void onChangeLocationProvidersSettingsClick(View view) {
-        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-    }*/
-
 
     @Override
     public void onStart() {
@@ -258,21 +263,15 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             switch (i) {
                 case 0:
                     fragment = new ActivityFragment();
-
                     return fragment;
                 case 1:
                     fragment = new HomeFragment();
-                    //args = new Bundle();
-                    //args.putInt(HomeFragment.ARG_OBJECT, i);
-                    //fragment.setArguments(args);
                     return fragment;
                 case 2:
                     fragment = new RequestsFragment();
-
                     return fragment;
                 case 3:
                     fragment = new OffersFragment();
-
                     return fragment;
                 case 4:
                     fragment = new InsertFragment();
@@ -315,23 +314,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     }
 
-            /*final Button button_1 = (Button) rootView.findViewById(R.id.request_button);
-            button_1.setOnClickListener(request);*/
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-        Button insert_button = (Button) findViewById(R.id.insert_button);
-        if (accessToken == null) {
-            mViewPager.setPagingEnabled(false);
-            insert_button.setVisibility(View.INVISIBLE);
-            findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
-        } else {
-            mViewPager.setPagingEnabled(true);
-            insert_button.setVisibility(View.VISIBLE);
-            findViewById(R.id.header_home).setVisibility(View.VISIBLE);
-        }
+        checkIfLogged(null);
     }
 
     @Override
@@ -360,16 +347,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
             //loginButton.setFragment(this);
             //loginButton.setOnClickListener(login);
-
-            if (accessToken == null) {
-                mViewPager.setPagingEnabled(false);
-                insert_button.setVisibility(View.INVISIBLE);
-                rootView.findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
-            } else {
-                mViewPager.setPagingEnabled(true);
-                insert_button.setVisibility(View.VISIBLE);
-                rootView.findViewById(R.id.header_home).setVisibility(View.VISIBLE);
-            }
+            ((MainActivity)getActivity()).checkIfLogged(rootView);
 
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
