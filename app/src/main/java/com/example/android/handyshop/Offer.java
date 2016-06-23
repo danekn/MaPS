@@ -1,6 +1,6 @@
 package com.example.android.handyshop;
 
-public class Request {
+public class Offer {
     private String userId;
     private String title;
     private String category;
@@ -9,7 +9,7 @@ public class Request {
     private double latitude;
     private double longitude;
 
-    public Request(String userId,String title, String category,String subCategory, String description,double latitude,double longitude){
+    public Offer(String userId, String title, String category, String subCategory, String description, double latitude, double longitude){
         this.userId=userId;
         this.title=title;
         this.category=category;
@@ -75,6 +75,6 @@ public class Request {
     }
 
 
-    public Request() {}
+    public Offer() {}
 }
 
