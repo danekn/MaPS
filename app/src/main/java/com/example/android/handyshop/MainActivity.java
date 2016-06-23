@@ -135,10 +135,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     mViewPager.setPagingEnabled(false);
                     if (insert_button != null)
                         insert_button.setVisibility(View.INVISIBLE);
-               //     findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
+                    //     findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
                 } else {
                     mViewPager.setPagingEnabled(true);
-                    if(insert_button!=null)
+                    if (insert_button != null)
                         insert_button.setVisibility(View.VISIBLE);
 //                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
                 }
@@ -391,10 +391,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                     final Firebase ref = handyShopDB.child("users");
 
                                     Query queryRef = ref.orderByChild("userId").equalTo(id);
-
                                     queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot snapshot) {
+
                                             if (snapshot.getChildrenCount() == 0) {
                                                 User usr = new User(id, name, email);
                                                 ref.push().setValue(usr);
@@ -463,8 +463,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     }
 
     public static class RequestsFragment extends Fragment {
+
+        LocationStruct ls=null;
         SparseArray<Group> requestsList = new SparseArray<Group>();
         MyExpandableListAdapter adapter;
+
+
 
 
         @Override
@@ -495,9 +499,47 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             super.setUserVisibleHint(isVisibleToUser);
             if (isVisibleToUser) {
 
-                Firebase ref = handyShopDB.child("requests");
+                ls = ((MainActivity)getActivity()).computeRadius(latitude,longitude,5);
+
+                final Firebase ref = handyShopDB.child("requests");
+                Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
+
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        if (snapshot.getChildrenCount() == 0)
+                            return;
+                        else
+                        {
+                            for (DataSnapshot d : snapshot.getChildren()) {
+
+                                Request req = d.getValue(Request.class);
+                                //System.out.println(request.toString());
+                                if(req.getLongitude()<=ls.getMaxLon() && req.getLongitude() >= ls.getMinLon())
+                                {
+                                    Group group = new Group(req.getCategory());
+                                    group.children.add(req.getDescription());
+                                    requestsList.append(requestsList.size(), group);
+                                }
+
+
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError f) {
+                    }
+
+
+
+           /*     Firebase ref = handyShopDB.child("requests");
 
                 Query queryRef = ref.orderByChild("userId").startAt(10);
+
                 queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
@@ -514,12 +556,14 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                             requestsList.append(requestsList.size(), group);
                         }
                         adapter.notifyDataSetChanged();
+
                     }
 
                     @Override
                     public void onCancelled(FirebaseError f) {
                     }
                 });
+
 
                 // Get a reference to our posts
                /* Firebase ref = handyShopDB.child("requests");
@@ -545,7 +589,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     public void onCancelled(FirebaseError firebaseError) {
                         System.out.println("The read failed: " + firebaseError.getMessage());
                     }
-                });*/
+                    */
+                });
 
             }
 
@@ -603,10 +648,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         Spinner spinner_subcategory = null;
         ArrayList<String> subcategory_choices = null;
         ArrayAdapter<String> spinnerAdapter = null;
-        public void sendRequest(){
+
+        public void sendRequest() {
 
 
         }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
@@ -706,39 +753,61 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-           // Bundle args = getArguments();
+            // Bundle args = getArguments();
             View rootView = null;
             //rootView = inflater.inflate(R.layout.insert, container, false);
             return rootView;
         }
     }
 
-public void sendRequest(View view) {
+    public void sendRequest(View view) {
 
-    Spinner spinner_category = (Spinner) findViewById(R.id.category_choice);
-    Spinner spinner_subcategory = (Spinner) findViewById(R.id.subcategory_choice);
+        Spinner spinner_category = (Spinner) findViewById(R.id.category_choice);
+        Spinner spinner_subcategory = (Spinner) findViewById(R.id.subcategory_choice);
 
-    String category = spinner_category.getSelectedItem().toString();
-    String subcategory = spinner_subcategory.getSelectedItem().toString();
+        String category = spinner_category.getSelectedItem().toString();
+        String subcategory = spinner_subcategory.getSelectedItem().toString();
 
-    EditText titleEdit = (EditText) findViewById(R.id.editTitle);
-    EditText descriptionEdit = (EditText) findViewById(R.id.editDescription);
+        EditText titleEdit = (EditText) findViewById(R.id.editTitle);
+        EditText descriptionEdit = (EditText) findViewById(R.id.editDescription);
 
-    String title = titleEdit.getText().toString();
-    String description = descriptionEdit.getText().toString();
+        String title = titleEdit.getText().toString();
+        String description = descriptionEdit.getText().toString();
 
-    Firebase ref = handyShopDB.child("requeste");
-    Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
-    System.out.println("latitude"+req.getLatitude());
+        Firebase ref = handyShopDB.child("requests");
+        Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
+        System.out.println("latitude" + req.getLatitude());
 
-    ref.push().setValue(req);
-    System.out.println(latitude);
-    System.out.println(longitude);
+        ref.push().setValue(req);
+        System.out.println(latitude);
+        System.out.println(longitude);
 
 
-}
+    }
 
-}
+
+    public LocationStruct computeRadius (double lat, double lon, int maxRadius){
+
+        double radius = maxRadius/6371;
+        double temp = Math.sin(radius)/Math.cos(lat);
+        double deltaLon = Math.asin(temp);
+
+        LocationStruct locationStruct = new LocationStruct();
+        locationStruct.setMinLat(lat-radius);
+        locationStruct.setMaxLat(lat+radius);
+        locationStruct.setMinLon(lon-deltaLon);
+        locationStruct.setMaxLon(lon+deltaLon);
+
+        return locationStruct;
+
+    }
+
+
+    }
+
+
+
+
 
 
 
