@@ -524,7 +524,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                 if(req.getLongitude()<=ls.getMaxLon() && req.getLongitude() >= ls.getMinLon())
                                 {
                                     double dist=computeDistance(req.getLatitude(),req.getLongitude(),latitude,longitude);
-                                    Group group = new Group(req.getCategory());
+                                    Group group = new Group(req.getTitle()+"  "+(Math.floor(dist * 100)/100)+" Km");
                                     group.children.add(req.getDescription());
                                     requestsList.append(requestsList.size(), group);
                                     System.out.println("distance: "+dist);
@@ -544,11 +544,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 });
 
             }
-
             else{
-                requestsList.clear();
-
+                if(adapter!=null) {
+                    requestsList.clear();
+                    adapter.notifyDataSetChanged();
+                }
             }
+
 
         }
     }
@@ -572,17 +574,62 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         @Override
         public void setUserVisibleHint(boolean isVisibleToUser) {
+
             super.setUserVisibleHint(isVisibleToUser);
+
             if (isVisibleToUser) {
-                Group group = new Group("Leo");
-                group.children.add("cazzone");
-                offersList.append(offersList.size(), group);
-                adapter.notifyDataSetChanged();
+
+                ls = ((MainActivity) getActivity()).computeRadius(latitude, longitude, 1);
+
+                final Firebase ref = handyShopDB.child("offers");
+                Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
+
+                offersList.clear();
+
+                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                        if (snapshot.getChildrenCount() == 0)
+                            return;
+                        else {
+                            for (DataSnapshot d : snapshot.getChildren()) {
+
+                                Request req = d.getValue(Request.class);
+                                if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
+                                    double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitude, longitude);
+
+                                    Group group = new Group(req.getTitle()+"  "+(int)dist+" Km");
+                                    group.children.add(req.getDescription());
+                                    offersList.append(offersList.size(), group);
+                                    System.out.println("distance: " + dist);
+
+                                    double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
+                                    System.out.println(dist2);
+                                }
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError f) {
+                    }
+                });
+
+            } else {
+                if(adapter!=null) {
+                    offersList.clear();
+                    adapter.notifyDataSetChanged();
+                }
             }
+
+
         }
-
-
     }
+
+
 
     public static class InsertFragment extends Fragment {
 
