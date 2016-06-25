@@ -370,6 +370,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             //loginButton.setOnClickListener(login);
             ((MainActivity)getActivity()).checkIfLogged(rootView);
 
+            Profile profile = Profile.getCurrentProfile();
+            if(profile!=null)
+                id = profile.getId();
+
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
@@ -590,11 +594,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         ArrayList<String> subcategory_choices = null;
         ArrayAdapter<String> spinnerAdapter = null;
 
-        public void sendRequest() {
-
-
-        }
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
@@ -670,12 +669,71 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     public static class ActivityFragment extends Fragment {
 
+        SparseArray<Group> activitiesList = new SparseArray<Group>();
+        MyExpandableListAdapter adapter;
+
+        public void getActivities(final String type){
+            final Firebase ref = handyShopDB.child(type);
+            Query queryRef = ref.orderByChild("userId").equalTo(id);
+
+            queryRef.addListenerForSingleValueEvent(new
+
+            ValueEventListener() {
+                @Override
+                public void onDataChange (DataSnapshot snapshot){
+
+                    if (snapshot.getChildrenCount() == 0)
+                        return;
+                    else {
+                        for (DataSnapshot d : snapshot.getChildren()) {
+
+                            if(type=="requests") {
+                                Request req = d.getValue(Request.class);
+                                //System.out.println(request.toString());
+                                Group group = new Group(req.getCategory());
+                                group.children.add(req.getDescription());
+                                activitiesList.append(activitiesList.size(), group);
+                            }
+                            else{
+                                Offer off = d.getValue(Offer.class);
+                                Group group = new Group(off.getCategory());
+                                group.children.add(off.getDescription());
+                                activitiesList.append(activitiesList.size(), group);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled (FirebaseError f){
+                }
+            });
+         }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            // Bundle args = getArguments();
+            Bundle args = getArguments();
             View rootView = null;
-            //rootView = inflater.inflate(R.layout.insert, container, false);
+            rootView = inflater.inflate(R.layout.activities, container, false);
+
+            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            adapter = new MyExpandableListAdapter(getActivity(), activitiesList);
+            listView.setAdapter(adapter);
             return rootView;
+        }
+
+        @Override
+        public void setUserVisibleHint(boolean isVisibleToUser) {
+            super.setUserVisibleHint(isVisibleToUser);
+            if (isVisibleToUser) {
+
+                activitiesList.clear();
+                getActivities("requests");
+                //getActivities("offers");
+            }
+
         }
     }
 
