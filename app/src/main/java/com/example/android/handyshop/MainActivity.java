@@ -58,6 +58,8 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 
@@ -180,9 +182,9 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             }
         } else {
             mViewPager.setPagingEnabled(true);
-            if(insert_button!=null)
-                insert_button.setVisibility(View.VISIBLE);
-            layout.setVisibility(View.VISIBLE);
+            if(insert_button!=null){}
+            //    insert_button.setVisibility(View.VISIBLE);
+                //layout.setVisibility(View.VISIBLE);
         }
     }
     @Override
@@ -517,9 +519,14 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                 //System.out.println(request.toString());
                                 if(req.getLongitude()<=ls.getMaxLon() && req.getLongitude() >= ls.getMinLon())
                                 {
+                                    double dist=computeDistance(req.getLatitude(),req.getLongitude(),latitude,longitude);
                                     Group group = new Group(req.getCategory());
                                     group.children.add(req.getDescription());
                                     requestsList.append(requestsList.size(), group);
+                                    System.out.println("distance: "+dist);
+
+                                    double dist2=computeDistance(latitude,longitude,latitude+20,longitude+50);
+                                    System.out.println(dist2);
                                 }
                             }
                             adapter.notifyDataSetChanged();
@@ -531,6 +538,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     public void onCancelled(FirebaseError f) {
                     }
                 });
+
+            }
+
+            else{
+                requestsList.clear();
 
             }
 
@@ -650,29 +662,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
             });
 
-            Button mButton = (Button) getActivity().findViewById(R.id.insertButton);
-            EditText mEdit = (EditText) getActivity().findViewById(R.id.editTitle);
 
-/*
-            mButton.setOnClickListener(
-                    new View.OnClickListener() {
-                        public void onClick(View view) {
-                            String category = spinner_category.getSelectedItem().toString();
-                            String subcategory = spinner_subcategory.getSelectedItem().toString();
-                            EditText titleEdit = (EditText) getActivity().findViewById(R.id.editTitle);
-                            EditText descriptionEdit = (EditText) getActivity().findViewById(R.id.editDescription);
-
-                            String title = titleEdit.getText().toString();
-                            String description = descriptionEdit.getText().toString();
-
-                            Firebase ref = handyShopDB.child("requests");
-                            Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
-                            ref.push().setValue(req);
-                        }
-
-                    });
-
-*/
             return rootView;
         }
     }
@@ -703,14 +693,30 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         String title = titleEdit.getText().toString();
         String description = descriptionEdit.getText().toString();
 
-        Firebase ref = handyShopDB.child("requests");
-        Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
-        System.out.println("latitude" + req.getLatitude());
+        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioType);
+        // get selected radio button from radioGroup
+        int selectedId = radioGroup.getCheckedRadioButtonId();
 
-        ref.push().setValue(req);
-        System.out.println(latitude);
-        System.out.println(longitude);
+        // find the radiobutton by returned id
+        RadioButton radioButton = (RadioButton) findViewById(selectedId);
+        String type = (String) radioButton.getText();
+        System.out.println(type);
 
+        switch (type) {
+
+            case "Offer":
+                Firebase ref = handyShopDB.child("offers");
+                Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
+                ref.push().setValue(req);
+                break;
+
+            case "Request":
+                Firebase re = handyShopDB.child("requests");
+                Request rq = new Request(id, title, category, subcategory, description, latitude, longitude);
+                re.push().setValue(rq);
+                break;
+            default:
+        }
 
     }
 
@@ -729,6 +735,19 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         return locationStruct;
 
+    }
+
+
+    public static double computeDistance( double lat1, double lon1,double lat2, double lon2 ){
+
+        double R=6371;
+
+        double dist = Math.acos(Math.sin(lat1)
+                * Math.sin(lat2) + Math.cos(lat1)
+                * Math.cos(lat2) * Math.cos(lon1 - lon2))
+                * R;
+
+        return dist;
     }
 }
 
