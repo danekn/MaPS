@@ -11,13 +11,13 @@ import android.widget.CheckedTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MyExpandableListAdapter extends BaseExpandableListAdapter {
+public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapter {
 
     private final SparseArray<Group> groups;
     public LayoutInflater inflater;
     public Activity activity;
 
-    public MyExpandableListAdapter(Activity act, SparseArray<Group> groups) {
+    public ExpandableRequestsOffersListAdapter(Activity act, SparseArray<Group> groups) {
         activity = act;
         this.groups = groups;
         inflater = act.getLayoutInflater();
@@ -38,18 +38,23 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String children = (String) getChild(groupPosition, childPosition);
         TextView text = null;
+
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.listrow_details, null);
-        }
-        text = (TextView) convertView.findViewById(R.id.textView1);
-        text.setText(children);
-        convertView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(activity, children,
-                        Toast.LENGTH_SHORT).show();
+            if (childPosition%2 == 0) {
+                convertView = inflater.inflate(R.layout.listrow_details_titles, null);
+
+
             }
-        });
+            else {
+                convertView = inflater.inflate(R.layout.listrow_details_content, null);
+
+
+            }
+        }
+
+        text = (TextView) convertView.findViewById(R.id.detail);
+        text.setText(children);
+
         return convertView;
     }
 

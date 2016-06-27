@@ -1,39 +1,27 @@
 package com.example.android.handyshop;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
-import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-
-import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,7 +39,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.Profile;
-import com.facebook.ProfileTracker;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -77,7 +64,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends FragmentActivity implements LocationListener {
 
@@ -483,7 +469,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     public static class RequestsFragment extends Fragment {
 
         SparseArray<Group> requestsList = new SparseArray<Group>();
-        MyExpandableListAdapter adapter;
+        ExpandableRequestsOffersListAdapter adapter;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -492,7 +478,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             rootView = inflater.inflate(R.layout.requests, container, false);
             //list = buildData();
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new MyExpandableListAdapter(getActivity(), requestsList);
+            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), requestsList);
             listView.setAdapter(adapter);
             return rootView;
         }
@@ -518,19 +504,30 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                         else
                         {
                             for (DataSnapshot d : snapshot.getChildren()) {
+                                String x=d.getKey();
 
                                 Request req = d.getValue(Request.class);
                                 //System.out.println(request.toString());
                                 if(req.getLongitude()<=ls.getMaxLon() && req.getLongitude() >= ls.getMinLon())
                                 {
                                     double dist=computeDistance(req.getLatitude(),req.getLongitude(),latitude,longitude);
+
                                     Group group = new Group(req.getTitle()+"  "+(Math.floor(dist * 100)/100)+" Km");
+
+                                    group.children.add("Category");
+                                    group.children.add(req.getCategory());
+                                    group.children.add("Subcategory");
+                                    group.children.add(req.getSubCategory());
+                                    group.children.add("Description");
                                     group.children.add(req.getDescription());
+                                    group.children.add("Email");
+                                    group.children.add(x);
                                     requestsList.append(requestsList.size(), group);
-                                    System.out.println("distance: "+dist);
 
                                     double dist2=computeDistance(latitude,longitude,latitude+20,longitude+50);
                                     System.out.println(dist2);
+
+                                    System.out.println("lunghezza" +group.children.size());
                                 }
                             }
                             adapter.notifyDataSetChanged();
@@ -559,7 +556,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     public static class OffersFragment extends Fragment {
 
         SparseArray<Group> offersList = new SparseArray<Group>();
-        MyExpandableListAdapter adapter;
+        ExpandableRequestsOffersListAdapter adapter;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -567,7 +564,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             View rootView = inflater.inflate(R.layout.offers, container, false);
 
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new MyExpandableListAdapter(getActivity(), offersList);
+            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), offersList);
             listView.setAdapter(adapter);
             return rootView;
         }
@@ -717,7 +714,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     public static class ActivityFragment extends Fragment {
 
         SparseArray<Group> activitiesList = new SparseArray<Group>();
-        MyExpandableListAdapter adapter;
+        ExpandableRequestsOffersListAdapter adapter;
 
         public void getActivities(final String type){
             final Firebase ref = handyShopDB.child(type);
@@ -766,7 +763,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             rootView = inflater.inflate(R.layout.activities, container, false);
 
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new MyExpandableListAdapter(getActivity(), activitiesList);
+            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), activitiesList);
             listView.setAdapter(adapter);
             return rootView;
         }

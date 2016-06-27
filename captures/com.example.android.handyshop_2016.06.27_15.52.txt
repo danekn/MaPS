@@ -1,0 +1,121 @@
+TASK com.example.android.handyshop id=114
+  ACTIVITY com.example.android.handyshop/.MainActivity 2c8e0a16 pid=29132
+    Local FragmentActivity 3d849a4 State:
+      mCreated=truemResumed=true mStopped=false mReallyStopped=false
+      mLoadersStarted=true
+    Active Fragments in 112130bb:
+      #0: null
+      #1: RequestsFragment{24cb8085 #1 id=0x7f0a0033}
+        mFragmentId=#7f0a0033 mContainerId=#7f0a0033 mTag=null
+        mState=5 mIndex=1 mWho=android:fragment:1 mBackStackNesting=0
+        mAdded=true mRemoving=false mFromLayout=false mInLayout=false
+        mHidden=false mDetached=false mMenuVisible=true mHasMenu=false
+        mRetainInstance=false mRetaining=false mUserVisibleHint=true
+        mFragmentManager=FragmentManager{112130bb in HostCallbacks{139ce9d8}}
+        mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+        mContainer=com.example.android.handyshop.CustomViewPager{1e1f9131 VFED.... ........ 0,0-1080,1701 #7f0a0033 app:id/pager}
+        mView=android.widget.LinearLayout{2e93f016 V.E..... ........ 1080,89-2160,1701 #7f0a005f app:id/req}
+        mInnerView=android.widget.LinearLayout{2e93f016 V.E..... ........ 1080,89-2160,1701 #7f0a005f app:id/req}
+        Child FragmentManager{2f281d97 in RequestsFragment{24cb8085}}:
+          FragmentManager misc state:
+            mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+            mContainer=android.support.v4.app.Fragment$1@6e2cb84
+            mParent=RequestsFragment{24cb8085 #1 id=0x7f0a0033}
+            mCurState=5 mStateSaved=false mDestroyed=false
+      #2: HomeFragment{34ab0f6d #2 id=0x7f0a0033}
+        mFragmentId=#7f0a0033 mContainerId=#7f0a0033 mTag=null
+        mState=5 mIndex=2 mWho=android:fragment:2 mBackStackNesting=0
+        mAdded=true mRemoving=false mFromLayout=false mInLayout=false
+        mHidden=false mDetached=false mMenuVisible=false mHasMenu=false
+        mRetainInstance=false mRetaining=false mUserVisibleHint=false
+        mFragmentManager=FragmentManager{112130bb in HostCallbacks{139ce9d8}}
+        mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+        mContainer=com.example.android.handyshop.CustomViewPager{1e1f9131 VFED.... ........ 0,0-1080,1701 #7f0a0033 app:id/pager}
+        mView=android.widget.LinearLayout{26d6f7a2 V.E..... ........ 0,89-1080,1701 #7f0a0041 app:id/home_container}
+        mInnerView=android.widget.LinearLayout{26d6f7a2 V.E..... ........ 0,89-1080,1701 #7f0a0041 app:id/home_container}
+        Child FragmentManager{3246fc33 in HomeFragment{34ab0f6d}}:
+          FragmentManager misc state:
+            mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+            mContainer=android.support.v4.app.Fragment$1@b831bf0
+            mParent=HomeFragment{34ab0f6d #2 id=0x7f0a0033}
+            mCurState=5 mStateSaved=false mDestroyed=false
+      #3: OffersFragment{193a6166 #3 id=0x7f0a0033}
+        mFragmentId=#7f0a0033 mContainerId=#7f0a0033 mTag=null
+        mState=5 mIndex=3 mWho=android:fragment:3 mBackStackNesting=0
+        mAdded=true mRemoving=false mFromLayout=false mInLayout=false
+        mHidden=false mDetached=false mMenuVisible=false mHasMenu=false
+        mRetainInstance=false mRetaining=false mUserVisibleHint=false
+        mFragmentManager=FragmentManager{112130bb in HostCallbacks{139ce9d8}}
+        mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+        mContainer=com.example.android.handyshop.CustomViewPager{1e1f9131 VFED.... ........ 0,0-1080,1701 #7f0a0033 app:id/pager}
+        mView=android.widget.LinearLayout{24f63569 V.E..... ........ 2160,89-3240,1701 #7f0a005e app:id/LinearLayout1}
+        mInnerView=android.widget.LinearLayout{24f63569 V.E..... ........ 2160,89-3240,1701 #7f0a005e app:id/LinearLayout1}
+        Child FragmentManager{3950ebee in OffersFragment{193a6166}}:
+          FragmentManager misc state:
+            mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+            mContainer=android.support.v4.app.Fragment$1@376b288f
+            mParent=OffersFragment{193a6166 #3 id=0x7f0a0033}
+            mCurState=5 mStateSaved=false mDestroyed=false
+    Added Fragments:
+      #0: HomeFragment{34ab0f6d #2 id=0x7f0a0033}
+      #1: RequestsFragment{24cb8085 #1 id=0x7f0a0033}
+      #2: OffersFragment{193a6166 #3 id=0x7f0a0033}
+    FragmentManager misc state:
+      mHost=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+      mContainer=android.support.v4.app.FragmentActivity$HostCallbacks@139ce9d8
+      mCurState=5 mStateSaved=false mDestroyed=false
+      mAvailIndices: [0]
+    View Hierarchy:
+      com.android.internal.policy.impl.PhoneWindow$DecorView{2c96071c V.E..... ... 0,0-1080,1776}
+        com.android.internal.widget.ActionBarOverlayLayout{db3bf25 V.ED.... ... 0,0-1080,1776 #1020373 android:id/decor_content_parent}
+          android.widget.FrameLayout{1563d8fa V.E..... ... 0,75-1080,1776 #1020002 android:id/content}
+            com.example.android.handyshop.CustomViewPager{1e1f9131 VFED.... ... 0,0-1080,1701 #7f0a0033 app:id/pager}
+              android.support.v4.view.PagerTitleStrip{12fbbeab V.E..... ... 1080,0-2160,89 #7f0a0034 app:id/pager_title_strip}
+                android.widget.TextView{2c8a7908 V.ED.... ... 0,12-128,77}
+                android.widget.TextView{c0628a1 V.ED.... ... 441,12-640,77}
+                android.widget.TextView{c868ac6 V.ED.... ... 948,12-1080,77}
+              android.widget.LinearLayout{2e93f016 V.E..... ... 1080,89-2160,1701 #7f0a005f app:id/req}
+                android.widget.ExpandableListView{2eb59a87 VFED.VC. F.. 0,0-1080,588 #7f0a0032 app:id/listView}
+                  android.widget.CheckedTextView{3d21db4 V.ED.... ... 0,0-1080,116 #7f0a005c app:id/textView1}
+                  android.widget.LinearLayout{12bbaddd V.E...C. ... 0,118-1080,175}
+                    android.widget.TextView{3ed08d52 V.ED.... ... 120,0-288,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{29475823 V.E...C. ... 0,177-1080,234}
+                    android.widget.TextView{1e4d6120 V.ED.... ... 120,0-264,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{394a4ad9 V.E...C. ... 0,236-1080,293}
+                    android.widget.TextView{4462c9e V.ED.... ... 120,0-355,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{13ad537f V.E...C. ... 0,295-1080,352}
+                    android.widget.TextView{3776f4c V.ED.... ... 120,0-372,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{3e8bbb95 V.E...C. ... 0,354-1080,411}
+                    android.widget.TextView{1ee474aa V.ED.... ... 120,0-333,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{284da89b V.E...C. ... 0,413-1080,470}
+                    android.widget.TextView{15523438 V.ED.... ... 120,0-789,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{3b397c11 V.E...C. ... 0,472-1080,529}
+                    android.widget.TextView{16d3176 V.ED.... ... 120,0-224,57 #7f0a005b app:id/detail}
+                  android.widget.LinearLayout{17d43377 V.E...C. ... 0,531-1080,588}
+                    android.widget.TextView{12125be4 V.ED.... ... 120,0-504,57 #7f0a005b app:id/detail}
+              android.widget.LinearLayout{26d6f7a2 V.E..... ... 0,89-1080,1701 #7f0a0041 app:id/home_container}
+                android.widget.LinearLayout{28c84d V.E..... ... 0,0-1080,568 #7f0a0042 app:id/header_home}
+                  android.widget.ImageView{36f2ef02 V.ED.... ... 154,0-926,264 #7f0a0043 app:id/imageLogo}
+                  android.widget.TextView{7ce9013 V.ED.... ... 0,264-1080,337 #7f0a0044 app:id/greet_home}
+                  android.widget.TextView{48b5250 V.ED.... ... 0,337-1080,410 #7f0a0045 app:id/profile_name}
+                android.widget.GridLayout{1c469c49 V.E..... ... 15,583-1065,1231 #7f0a0046 app:id/middle_home}
+                  android.widget.Button{3724f94e VFED..C. ... 12,12-582,312 #7f0a0047 app:id/insert_button}
+                  android.widget.Button{1f081a6f VFED..C. ... 606,12-1176,312 #7f0a0048 app:id/search_request}
+                  android.widget.Button{f5b437c VFED..C. ... 12,336-582,636 #7f0a0049 app:id/search_offer}
+                  android.widget.Button{653b405 VFED..C. ... 606,336-1176,636 #7f0a004a app:id/my_handyshop}
+                android.widget.FrameLayout{335b5c5a V.E..... ... 0,1246-1080,1612 #7f0a004b app:id/footer_home}
+                  com.facebook.login.widget.LoginButton{3ba5ee8b VFED..C. ... 277,90-803,176 #7f0a004c app:id/login_button}
+              android.widget.LinearLayout{24f63569 V.E..... ... 2160,89-3240,1701 #7f0a005e app:id/LinearLayout1}
+                android.widget.ExpandableListView{3ed71b68 V.ED.VC. ... 0,0-1080,0 #7f0a0032 app:id/listView}
+          com.android.internal.widget.ActionBarContainer{26608b81 G.ED.... ... 0,0-0,0 #1020374 android:id/action_bar_container}
+            com.android.internal.widget.ActionBarView{2862e426 V.E..... ... 0,0-0,0 #1020375 android:id/action_bar}
+              android.widget.LinearLayout{2f02e867 V.....C. ... 0,0-0,0}
+                com.android.internal.widget.ActionBarView$HomeView{db68614 V.E..... ... 0,0-0,0}
+                  android.widget.ImageView{3b095ebd G.ED.... ... 0,0-0,0 #102003b android:id/up}
+                  android.widget.ImageView{1091cb2 V.ED.... ... 0,0-0,0 #102002c android:id/home}
+                android.widget.LinearLayout{1b4ba403 V.E..... ... 0,0-0,0}
+                  android.widget.TextView{87fef80 V.ED.... ... 0,0-0,0 #10202b4 android:id/action_bar_title}
+                  android.widget.TextView{167229b9 G.ED.... ... 0,0-0,0 #10202b5 android:id/action_bar_subtitle}
+              android.widget.ActionMenuView{156851fe V.ED.... ... 0,0-0,0}
+            com.android.internal.widget.ActionBarContextView{eda7d5f G.E..... ... 0,0-0,0 #1020376 android:id/action_context_bar}
+          com.android.internal.widget.ActionBarContainer{3bb483ac G.ED.... ... 0,0-0,0 #1020377 android:id/split_action_bar}
