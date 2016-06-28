@@ -50,11 +50,12 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -68,7 +69,7 @@ import java.util.Arrays;
 public class MainActivity extends FragmentActivity implements LocationListener {
 
 
-    static Firebase handyShopDB;
+    static DatabaseReference handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
     static CallbackManager callbackManager;
     static CustomViewPager mViewPager;
@@ -95,8 +96,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(myCollectionPagerAdapter);
         //set Database and callbacks
-        Firebase.setAndroidContext(this);
-        handyShopDB = new Firebase("https://amber-torch-5366.firebaseio.com");
+
+        handyShopDB = FirebaseDatabase.getInstance().getReference();
         handyShopDB.addValueEventListener(new ValueEventListener() {
 
 
@@ -106,8 +107,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                System.out.println("The read failed: " + firebaseError.getMessage());
+            public void onCancelled(DatabaseError DatabaseError) {
+                System.out.println("The read failed: " + DatabaseError.getMessage());
             }
         });
 
@@ -377,7 +378,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                         name = object.getString("name");
                                     } catch (JSONException e) {
                                     }
-                                    final Firebase ref = handyShopDB.child("users");
+                                    final DatabaseReference ref = handyShopDB.child("users");
+
 
                                     Query queryRef = ref.orderByChild("userId").equalTo(id);
                                     queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -393,7 +395,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                         }
 
                                         @Override
-                                        public void onCancelled(FirebaseError f) {
+                                        public void onCancelled(DatabaseError f) {
                                         }
                                     });
                                 }
@@ -459,7 +461,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         View.OnClickListener insert = new View.OnClickListener() {
             public void onClick(View v) {
                 // do something here
-                mViewPager.setCurrentItem(4);
+                //mViewPager.setCurrentItem(4);
+
+                startActivity(new Intent(getContext(), MapsActivity.class));
+
             }
         };
 
@@ -490,7 +495,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                 ls = ((MainActivity)getActivity()).computeRadius(latitude,longitude,1);
 
-                final Firebase ref = handyShopDB.child("requests");
+                final DatabaseReference ref = handyShopDB.child("requests");
                 Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
 
                 requestsList.clear();
@@ -536,7 +541,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError f) {
+                    public void onCancelled(DatabaseError f) {
                     }
                 });
 
@@ -578,7 +583,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                 ls = ((MainActivity) getActivity()).computeRadius(latitude, longitude, 1);
 
-                final Firebase ref = handyShopDB.child("offers");
+                final DatabaseReference ref = handyShopDB.child("offers");
                 Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
 
                 offersList.clear();
@@ -611,7 +616,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError f) {
+                    public void onCancelled(DatabaseError f) {
                     }
                 });
 
@@ -717,7 +722,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         ExpandableRequestsOffersListAdapter adapter;
 
         public void getActivities(final String type){
-            final Firebase ref = handyShopDB.child(type);
+            final DatabaseReference ref = handyShopDB.child(type);
             Query queryRef = ref.orderByChild("userId").equalTo(id);
 
             queryRef.addListenerForSingleValueEvent(new
@@ -751,7 +756,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 }
 
                 @Override
-                public void onCancelled (FirebaseError f){
+                public void onCancelled (DatabaseError f){
                 }
             });
          }
@@ -807,13 +812,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         switch (type) {
 
             case "Offer":
-                Firebase ref = handyShopDB.child("offers");
+                DatabaseReference ref = handyShopDB.child("offers");
                 Request req = new Request(id, title, category, subcategory, description, latitude, longitude);
                 ref.push().setValue(req);
                 break;
 
             case "Request":
-                Firebase re = handyShopDB.child("requests");
+                DatabaseReference re = handyShopDB.child("requests");
                 Request rq = new Request(id, title, category, subcategory, description, latitude, longitude);
                 re.push().setValue(rq);
                 break;

@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/background_handyshop"
-    android:id="@+id/home_container"
+    android:id="@+id/header_home"
     android:baselineAligned="false"
     android:alpha="1"
 
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_weight="0.08"
-        android:id="@+id/header_home"
+
         android:weightSum="1">
 
 
