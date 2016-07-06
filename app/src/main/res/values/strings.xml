@@ -13,10 +13,24 @@
     <string name="category_prompt">Choose a category</string>
     <string name="subcategory_prompt">Choose a subcategory</string>
 
+    <string name="title_filter">Filter by Category</string>
+
+
+    <string name="offer_expandable">Offers around you</string>
+    <string name="request_expandable">Requests around you</string>
+
     <string name="request_type">Offer</string>
     <string name="type_insert">Type to insert</string>
     <string name="offer_type">Request</string>
+
     <string-array name="category_arrays">
+        <item>Rentals</item>
+        <item>Tools</item>
+        <item>Services</item>
+    </string-array>
+
+    <string-array name="category_arrays_filter">
+        <item>All</item>
         <item>Rentals</item>
         <item>Tools</item>
         <item>Services</item>

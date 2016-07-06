@@ -53,8 +53,7 @@
         android:columnCount="2"
         android:orientation="horizontal"
         android:useDefaultMargins="true"
-        android:alignmentMode="alignBounds"
-        >
+        android:alignmentMode="alignBounds">
 
         <Button
             android:layout_width="190dp"
@@ -62,14 +61,13 @@
             android:text="Insert"
             android:id="@+id/insert_button"
             android:background="#2691FC"
-            android:alpha="1"
-            />
+            android:alpha="1" />
 
         <Button
             android:layout_width="190dp"
             android:layout_height="100dp"
-            android:text="Search For Request"
-            android:id="@+id/search_request"
+            android:text="Open Telegram"
+            android:id="@+id/telegram_chat"
             android:background="#2691FC"
             android:alpha="1"/>
         <Button
@@ -91,21 +89,6 @@
         />
     </GridLayout>
 
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/footer_home"
-        android:layout_weight="0.05">
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/login_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp" />
-    </FrameLayout>
 
 </LinearLayout>
 

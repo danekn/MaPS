@@ -1,6 +1,8 @@
 package com.example.android.handyshop;
 
-public class Offer {
+import java.io.Serializable;
+
+public class Offer implements Serializable{
     private String userId;
     private String title;
     private String category;

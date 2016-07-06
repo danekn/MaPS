@@ -3,7 +3,38 @@
     android:id="@+id/req"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity"
+    android:gravity="fill_vertical"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/title_filter"
+        android:id="@+id/filter_title"
+        android:layout_weight="0.03"
+        android:textStyle="bold"/>
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/category_choice_filter"
+        android:layout_weight="0.03"
+        android:spinnerMode="dropdown"
+        android:prompt="@string/category_prompt"
+        android:entries="@array/category_arrays"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/request_expandable"
+        android:id="@+id/expandable_title_request"
+        android:layout_weight="0.03"
+        android:textStyle="bold"/>
 
     <ExpandableListView
         android:id="@+id/listView"

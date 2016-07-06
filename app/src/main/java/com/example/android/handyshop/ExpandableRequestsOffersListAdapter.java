@@ -40,21 +40,21 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
         TextView text = null;
 
         if (convertView == null) {
-            if (childPosition%2 == 0) {
+            if (children=="Category"||children=="Subcategory"||children=="Description"||children=="Email") {
                 convertView = inflater.inflate(R.layout.listrow_details_titles, null);
 
 
+                text = (TextView) convertView.findViewById(R.id.detail);
+                text.setText(children);
             }
             else {
                 convertView = inflater.inflate(R.layout.listrow_details_content, null);
 
 
+                text = (TextView) convertView.findViewById(R.id.detail);
+                text.setText(children);
             }
         }
-
-        text = (TextView) convertView.findViewById(R.id.detail);
-        text.setText(children);
-
         return convertView;
     }
 

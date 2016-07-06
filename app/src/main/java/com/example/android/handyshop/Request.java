@@ -1,6 +1,8 @@
 package com.example.android.handyshop;
 
-public class Request {
+import java.io.Serializable;
+
+public class Request implements Serializable {
     private String userId;
     private String title;
     private String category;
@@ -75,6 +77,8 @@ public class Request {
     }
 
 
-    public Request() {}
+
+    public Request() {
+    }
 }
 
