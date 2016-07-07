@@ -21,11 +21,25 @@
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/category_choice_filter"
+        android:id="@+id/category_choice_filter_request"
         android:layout_weight="0.03"
         android:spinnerMode="dropdown"
         android:prompt="@string/category_prompt"
-        android:entries="@array/category_arrays"/>
+        android:entries="@array/category_arrays_filter"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/seekbar_string_request"
+        android:id="@+id/seekbar_title_request"
+        android:layout_weight="0.03"
+        android:textStyle="bold"/>
+
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar_request" />
+
 
     <TextView
         android:layout_width="wrap_content"

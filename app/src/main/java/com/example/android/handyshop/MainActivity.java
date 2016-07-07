@@ -333,16 +333,257 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         SparseArray<Group> requestsList = new SparseArray<Group>();
         ExpandableRequestsOffersListAdapter adapter;
+        View rootView = null;
+        SparseArray<Group> requestList = new SparseArray<Group>();
+        Spinner spinner = null;
+        ArrayAdapter<String> spinnerAdapter = null;
+        String text_category=null;
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
-            View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
-            //list = buildData();
+
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), requestsList);
+
+            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), requestList);
             listView.setAdapter(adapter);
+
+
+            spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
+
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
+                    requestList.clear();
+                    adapter.notifyDataSetChanged();
+                    text_category = spinner.getSelectedItem().toString();
+                    System.out.println(text_category);
+
+                    ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
+
+                    final DatabaseReference ref = handyShopDB.child("requests");
+                    Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
+
+
+                    queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            requestList.clear();
+                            adapter.notifyDataSetChanged();
+
+                            if (snapshot.getChildrenCount() == 0)
+                                return;
+                            else {
+                                for (DataSnapshot d : snapshot.getChildren()) {
+                                    String x = d.getKey();
+                                    Request req = d.getValue(Request.class);
+                                    if(text_category.equals("All"))
+                                    {
+
+                                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
+                                            double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
+                                            Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+                                            group.children.add("Category");
+                                            group.children.add(req.getCategory());
+                                            group.children.add("Subcategory");
+                                            group.children.add(req.getSubCategory());
+                                            group.children.add("Description");
+                                            group.children.add(req.getDescription());
+                                            group.children.add("Email");
+                                            group.children.add(x);
+                                            requestList.append(requestList.size(), group);
+                                            System.out.println(group.children);
+                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
+                                            nRequestList.add(req);
+                                        }
+
+                                    }
+
+                                    else {
+                                        requestList.clear();
+                                        adapter.notifyDataSetChanged();
+                                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon() && req.getCategory().equals(text_category)) {
+                                            double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
+                                            Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+                                            group.children.add("Category");
+                                            group.children.add(req.getCategory());
+                                            group.children.add("Subcategory");
+                                            group.children.add(req.getSubCategory());
+                                            group.children.add("Description");
+                                            group.children.add(req.getDescription());
+                                            group.children.add("Email");
+                                            group.children.add(x);
+                                            requestList.append(requestList.size(), group);
+                                            System.out.println(group.children);
+                                            System.out.println("CAMPI");
+                                            System.out.println(group.children.get(0));
+                                            System.out.println(group.children.get(1));
+                                            System.out.println(group.children.get(2));
+                                            System.out.println(group.children.get(3));
+                                            System.out.println(group.children.get(4));
+                                            System.out.println(group.children.get(5));
+                                            System.out.println(group.children.get(6));
+                                            System.out.println(group.children.get(7));
+
+
+
+
+                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
+                                            nRequestList.add(req);
+                                        }
+
+                                    }
+
+
+                                }
+                                adapter.notifyDataSetChanged();
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError f) {
+                        }
+                    });
+
+
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+
+            });
+
+
+            SeekBar seekBar = (SeekBar)rootView.findViewById(R.id.seekBar_request);
+            seekBar.setMax(10);
+            final TextView seekBarValue = (TextView)rootView.findViewById(R.id.seekbar_title_request);
+
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress,
+                                              boolean fromUser) {
+
+                    seekBarValue.setText(String.valueOf("Choice Distance Range "+progress+" km"));
+                    Radius=progress;
+
+                    {
+                        spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
+                        requestList.clear();
+                        adapter.notifyDataSetChanged();
+                        text_category = spinner.getSelectedItem().toString();
+                        System.out.println(text_category);
+
+                        ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
+
+                        final DatabaseReference ref = handyShopDB.child("requests");
+                        Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
+
+
+                        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot snapshot) {
+                                requestList.clear();
+                                adapter.notifyDataSetChanged();
+
+                                if (snapshot.getChildrenCount() == 0)
+                                    return;
+                                else {
+                                    for (DataSnapshot d : snapshot.getChildren()) {
+                                        String x = d.getKey();
+                                        Request req = d.getValue(Request.class);
+                                        if(text_category.equals("All"))
+                                        {
+
+                                            if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
+                                                double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
+                                                Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+                                                group.children.add("Category");
+                                                group.children.add(req.getCategory());
+                                                group.children.add("Subcategory");
+                                                group.children.add(req.getSubCategory());
+                                                group.children.add("Description");
+                                                group.children.add(req.getDescription());
+                                                group.children.add("Email");
+                                                group.children.add(x);
+                                                requestList.append(requestList.size(), group);
+                                                System.out.println(group.children);
+                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
+                                                nRequestList.add(req);
+                                            }
+
+                                        }
+
+                                        else {
+                                            requestList.clear();
+                                            adapter.notifyDataSetChanged();
+                                            if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon() && req.getCategory().equals(text_category)) {
+                                                double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
+                                                Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+                                                group.children.add("Category");
+                                                group.children.add(req.getCategory());
+                                                group.children.add("Subcategory");
+                                                group.children.add(req.getSubCategory());
+                                                group.children.add("Description");
+                                                group.children.add(req.getDescription());
+                                                group.children.add("Email");
+                                                group.children.add(x);
+                                                requestList.append(requestList.size(), group);
+                                                System.out.println(group.children);
+                                                System.out.println("CAMPI");
+                                                System.out.println(group.children.get(0));
+                                                System.out.println(group.children.get(1));
+                                                System.out.println(group.children.get(2));
+                                                System.out.println(group.children.get(3));
+                                                System.out.println(group.children.get(4));
+                                                System.out.println(group.children.get(5));
+                                                System.out.println(group.children.get(6));
+                                                System.out.println(group.children.get(7));
+
+
+
+
+                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
+                                                nRequestList.add(req);
+                                            }
+
+                                        }
+
+
+                                    }
+                                    adapter.notifyDataSetChanged();
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError f) {
+                            }
+                        });
+
+
+                    }
+
+
+                    }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+
+
             return rootView;
         }
 
