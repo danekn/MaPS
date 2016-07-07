@@ -22,6 +22,7 @@
     <string name="request_type">Offer</string>
     <string name="type_insert">Type to insert</string>
     <string name="offer_type">Request</string>
+    <string name="seekbar_string_offer">Choice Distance Range</string>
 
     <string-array name="category_arrays">
         <item>Rentals</item>

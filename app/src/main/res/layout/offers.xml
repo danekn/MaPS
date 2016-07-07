@@ -30,6 +30,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/seekbar_string_offer"
+        android:id="@+id/seekbar_title_offer"
+        android:layout_weight="0.03"
+        android:textStyle="bold"/>
+
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar_offer" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/offer_expandable"
         android:id="@+id/expandable_title_offer"
         android:layout_weight="0.03"
