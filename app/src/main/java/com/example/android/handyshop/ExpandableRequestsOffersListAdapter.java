@@ -36,24 +36,35 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
+
         final String children = (String) getChild(groupPosition, childPosition);
         TextView text = null;
 
         if (convertView == null) {
-            if (children=="Category"||children=="Subcategory"||children=="Description"||children=="Email") {
+            if (childPosition==0||childPosition==2||childPosition==4||childPosition==6 ){
                 convertView = inflater.inflate(R.layout.listrow_details_titles, null);
 
 
                 text = (TextView) convertView.findViewById(R.id.detail);
                 text.setText(children);
             }
-            else {
+
+            else if(childPosition==1||childPosition==3||childPosition==5||childPosition==7) {
                 convertView = inflater.inflate(R.layout.listrow_details_content, null);
 
 
                 text = (TextView) convertView.findViewById(R.id.detail);
                 text.setText(children);
             }
+
+            else{
+                convertView = inflater.inflate(R.layout.listrow_details_image, null);
+
+                text = (TextView) convertView.findViewById(R.id.detail);
+                text.setText(children);
+                System.out.println("CHILDREN"+children);
+            }
+
         }
         return convertView;
     }

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -12,6 +14,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -29,8 +32,10 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -40,12 +45,17 @@ import android.widget.TextView;
 
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import junit.framework.Test;
 
@@ -71,6 +81,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static List<Request> nRequestList = null;
     static List<Offer> nOfferList=null;
     public static double Radius;
+
+    public static StorageReference storageRef=null;
+    public static FirebaseStorage storage=null;
+    public static StorageReference imagesRef=null;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -103,6 +117,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         });
         Radius=1;
 
+        /* Creating Storage for image */
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://amber-torch-5366.appspot.com");
+        imagesRef = storageRef.child("images/logo.png");
+
         nRequestList = new ArrayList<Request>();
         nOfferList=new ArrayList<Offer>();
     }
@@ -124,13 +143,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     @Override
     public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
+
 
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
+
 
     }
 
@@ -235,11 +254,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
 
     public static class HomeFragment extends Fragment {
-
-
         Button insert_button = null;
         Button telegram_button=null;
+        Button upload_button=null;
         View rootView = null;
+        Button download_button=null;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -247,6 +266,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             rootView = inflater.inflate(R.layout.home, container, false);
             insert_button = (Button) rootView.findViewById(R.id.insert_button);
             insert_button.setOnClickListener(insert);
+
+            upload_button = (Button) rootView.findViewById(R.id.upload);
+            upload_button.setOnClickListener(uploadImg);
+
+            download_button = (Button) rootView.findViewById(R.id.download_img);
+            download_button.setOnClickListener(download_img);
+
             telegram_button= (Button) rootView.findViewById(R.id.telegram_chat);
             telegram_button.setOnClickListener(telegram_mes);
 
@@ -306,6 +332,60 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 intent.putExtra("BUNDLE",args);
 
                 startActivity(intent);
+
+            }
+        };
+
+
+        View.OnClickListener uploadImg = new View.OnClickListener() {
+            public void onClick(View v) {
+
+                System.out.println(imagesRef);
+
+                ImageView imageView= (ImageView) rootView.findViewById(R.id.imageLogo);
+                imageView.setDrawingCacheEnabled(true);
+                imageView.buildDrawingCache();
+                Bitmap bitmap = imageView.getDrawingCache();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+
+                UploadTask uploadTask = imagesRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                    }
+                });
+
+            }
+        };
+
+
+        View.OnClickListener download_img = new View.OnClickListener() {
+            public void onClick(View v) {
+                
+                imagesRef.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        ImageView imageView= (ImageView) rootView.findViewById(R.id.imageLogo0);
+                        imageView.setImageBitmap(bmp);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                    }
+                });
 
             }
         };
@@ -511,6 +591,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                                 group.children.add(req.getDescription());
                                                 group.children.add("Email");
                                                 group.children.add(x);
+                                                group.children.add("Picture");
+
                                                 requestList.append(requestList.size(), group);
                                                 System.out.println(group.children);
                                                 double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
@@ -533,6 +615,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                                 group.children.add(req.getDescription());
                                                 group.children.add("Email");
                                                 group.children.add(x);
+                                                group.children.add("Picture");
                                                 requestList.append(requestList.size(), group);
                                                 System.out.println(group.children);
                                                 System.out.println("CAMPI");
@@ -631,6 +714,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                     group.children.add(req.getDescription());
                                     group.children.add("Email");
                                     group.children.add(x);
+                                    group.children.add("Picture");
                                     requestsList.append(requestsList.size(), group);
 
 
@@ -726,6 +810,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                             group.children.add(off.getDescription());
                                             group.children.add("Email");
                                             group.children.add(x);
+                                            group.children.add("Picture");
                                             offersList.append(offersList.size(), group);
                                             System.out.println(group.children);
                                             double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
@@ -748,6 +833,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                             group.children.add(off.getDescription());
                                             group.children.add("Email");
                                             group.children.add(x);
+                                            group.children.add("Picture");
                                             offersList.append(offersList.size(), group);
                                             System.out.println(group.children);
                                             System.out.println("CAMPI");
@@ -843,6 +929,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                                 group.children.add(off.getDescription());
                                                 group.children.add("Email");
                                                 group.children.add(x);
+                                                group.children.add("Picture");
                                                 offersList.append(offersList.size(), group);
                                                 System.out.println(group.children);
                                                 double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
@@ -865,6 +952,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                                 group.children.add(off.getDescription());
                                                 group.children.add("Email");
                                                 group.children.add(x);
+                                                group.children.add("Picture");
                                                 offersList.append(offersList.size(), group);
                                                 System.out.println(group.children);
                                                 System.out.println("CAMPI");

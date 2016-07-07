@@ -25,6 +25,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
+        <ImageView
+
+            android:id="@+id/imageLogo0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
 
         <TextView
             android:layout_width="fill_parent"
@@ -73,16 +79,16 @@
         <Button
             android:layout_width="190dp"
             android:layout_height="100dp"
-            android:text="Search For Offer"
-            android:id="@+id/search_offer"
+            android:text="Upload"
+            android:id="@+id/upload"
             android:background="#2691FC"
             android:alpha="1"
              />
         <Button
             android:layout_width="190dp"
             android:layout_height="100dp"
-            android:text="My Handyshop"
-            android:id="@+id/my_handyshop"
+            android:text="Download"
+            android:id="@+id/download_img"
             android:background="#2691FC"
             android:alpha="1"
 
