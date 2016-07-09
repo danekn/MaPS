@@ -14,6 +14,8 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.util.Arrays;
+
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -31,10 +33,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.Profile;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -44,6 +61,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -58,6 +78,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import junit.framework.Test;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -87,6 +110,13 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     public static StorageReference imagesRef=null;
 
 
+    static CallbackManager callbackManager;
+    static AccessToken accessToken = null;
+    static AccessTokenTracker accessTokenTracker = null;
+    private GoogleApiClient client;
+
+
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -100,6 +130,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(myCollectionPagerAdapter);
+
 
         handyShopDB = FirebaseDatabase.getInstance().getReference();
         handyShopDB.addValueEventListener(new ValueEventListener() {
@@ -122,6 +153,41 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         storageRef = storage.getReferenceFromUrl("gs://amber-torch-5366.appspot.com");
         imagesRef = storageRef.child("images/logo.png");
 
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
+        callbackManager = CallbackManager.Factory.create();
+
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                accessToken = currentAccessToken;
+                System.out.println("currentAccess");
+
+                checkIfLogged(null);
+
+                Button insert_button = (Button) findViewById(R.id.insert_button);
+                if (accessToken == null) {
+                    mViewPager.setPagingEnabled(false);
+                    if (insert_button != null)
+                        insert_button.setVisibility(View.INVISIBLE);
+                    //     findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
+                } else {
+                    mViewPager.setPagingEnabled(true);
+                    if (insert_button != null)
+                        insert_button.setVisibility(View.VISIBLE);
+//                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
+                }
+
+            }
+        };
+        accessToken = AccessToken.getCurrentAccessToken();
+
+
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        if (savedInstanceState == null) {
+            mViewPager.setCurrentItem(1);
+        }
         nRequestList = new ArrayList<Request>();
         nOfferList=new ArrayList<Offer>();
     }
@@ -174,12 +240,37 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     @Override
     public void onStart() {
         super.onStart();
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+
     }
 
 
     @Override
     public void onStop() {
         super.onStop();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.android.handyshop/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
 
     }
 
@@ -248,8 +339,17 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        accessTokenTracker.stopTracking();
+        System.out.println("logout");
 
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        checkIfLogged(null);
     }
 
 
@@ -259,6 +359,9 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         Button upload_button=null;
         View rootView = null;
         Button download_button=null;
+
+        String name = null;
+        String email = null;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -275,6 +378,78 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
             telegram_button= (Button) rootView.findViewById(R.id.telegram_chat);
             telegram_button.setOnClickListener(telegram_mes);
+
+
+            LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
+            loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
+            //loginButton.setFragment(this);
+            //loginButton.setOnClickListener(login);
+            ((MainActivity)getActivity()).checkIfLogged(rootView);
+
+            Profile profile = Profile.getCurrentProfile();
+            if(profile!=null)
+                id = profile.getId();
+
+            LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    GraphRequest request = GraphRequest.newMeRequest(
+                            loginResult.getAccessToken(),
+                            new GraphRequest.GraphJSONObjectCallback() {
+                                @Override
+                                public void onCompleted(JSONObject object, GraphResponse response) {
+                                    Log.v("LoginActivity", response.toString());
+
+                                    // Application code
+                                    try {
+                                        email = object.getString("email");
+                                        id = object.getString("id");
+                                        name = object.getString("name");
+                                    } catch (JSONException e) {
+                                    }
+                                    final DatabaseReference ref = handyShopDB.child("users");
+
+
+                                    Query queryRef = ref.orderByChild("userId").equalTo(id);
+                                    queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot snapshot) {
+
+                                            if (snapshot.getChildrenCount() == 0) {
+                                                User usr = new User(id, name, email);
+                                                ref.push().setValue(usr);
+
+                                            } else
+                                                System.out.println("Utente gia presente");
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError f) {
+                                        }
+                                    });
+                                }
+                            });
+                    Bundle parameters = new Bundle();
+                    parameters.putString("fields", "id,name,email");
+                    request.setParameters(parameters);
+                    request.executeAsync();
+
+                }
+
+                @Override
+                public void onCancel() {
+                    // App code
+                }
+
+                @Override
+                public void onError(FacebookException exception) {
+                    // App code
+                }
+            });
+
+
+
+
 
             return rootView;
         }
@@ -1240,6 +1415,32 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 * R;
 
         return dist;
+    }
+
+    public void checkIfLogged(View v){
+        Button insert_button;
+        LinearLayout layout;
+        GridLayout grid;
+        if(v!=null) {
+            insert_button = (Button) v.findViewById(R.id.insert_button);
+            layout = (LinearLayout) v.findViewById(R.id.header_home);
+            grid =(GridLayout) v.findViewById(R.id.middle_home);
+        }
+        else{
+            insert_button = (Button) findViewById(R.id.insert_button);
+            layout = (LinearLayout) findViewById(R.id.header_home);
+            grid =(GridLayout) findViewById(R.id.middle_home);
+        }
+        if (accessToken == null) {
+            mViewPager.setPagingEnabled(false);
+            layout.setVisibility(View.INVISIBLE);
+            grid.setVisibility(View.INVISIBLE);
+
+        } else {
+            mViewPager.setPagingEnabled(true);
+            grid.setVisibility(View.VISIBLE);
+            layout.setVisibility(View.VISIBLE);
+        }
     }
 }
 

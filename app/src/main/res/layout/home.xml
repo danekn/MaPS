@@ -3,10 +3,8 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/background_handyshop"
-    android:id="@+id/header_home"
     android:baselineAligned="false"
     android:alpha="1"
-
     >
 
     <LinearLayout android:orientation="vertical"
@@ -14,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_weight="0.08"
-
+        android:id="@+id/header_home"
         android:weightSum="1">
 
 
@@ -50,6 +48,7 @@
             />
 
     </LinearLayout>
+
     <GridLayout
         android:layout_margin="5dp"
         android:id="@+id/middle_home"
@@ -94,6 +93,20 @@
 
         />
     </GridLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/footer_home"
+        android:layout_weight="0.05">
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp" />
+    </FrameLayout>
+
 
 
 </LinearLayout>
