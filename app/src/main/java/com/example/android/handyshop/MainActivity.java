@@ -31,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import com.facebook.AccessToken;
@@ -84,12 +85,14 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
 public class MainActivity extends FragmentActivity implements LocationListener {
 
-
+    static public double RadiusOffer=10;
+    static public double RadiusRequest=10;
     static DatabaseReference handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
 
@@ -103,7 +106,9 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static LocationStruct ls = null;
     static List<Request> nRequestList = null;
     static List<Offer> nOfferList=null;
-    public static double Radius;
+
+
+
 
     public static StorageReference storageRef=null;
     public static FirebaseStorage storage=null;
@@ -146,7 +151,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 System.out.println("The read failed: " + DatabaseError.getMessage());
             }
         });
-        Radius=1;
+
 
         /* Creating Storage for image */
         storage = FirebaseStorage.getInstance();
@@ -162,22 +167,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 accessToken = currentAccessToken;
                 System.out.println("currentAccess");
-
                 checkIfLogged(null);
-
-                Button insert_button = (Button) findViewById(R.id.insert_button);
-                if (accessToken == null) {
-                    mViewPager.setPagingEnabled(false);
-                    if (insert_button != null)
-                        insert_button.setVisibility(View.INVISIBLE);
-                    //     findViewById(R.id.header_home).setVisibility(View.INVISIBLE);
-                } else {
-                    mViewPager.setPagingEnabled(true);
-                    if (insert_button != null)
-                        insert_button.setVisibility(View.VISIBLE);
-//                    findViewById(R.id.header_home).setVisibility(View.VISIBLE);
-                }
-
             }
         };
         accessToken = AccessToken.getCurrentAccessToken();
@@ -547,7 +537,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         View.OnClickListener download_img = new View.OnClickListener() {
             public void onClick(View v) {
-                
+
                 imagesRef.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
@@ -586,125 +576,36 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     public static class RequestsFragment extends Fragment {
 
-        SparseArray<Group> requestsList = new SparseArray<Group>();
+        ExpandableListView expandableListView;
         ExpandableRequestsOffersListAdapter adapter;
-        View rootView = null;
-        SparseArray<Group> requestList = new SparseArray<Group>();
+        List<String> requestsListTitle= null;
+        HashMap<String, List<String>> requestsListDetail;
         Spinner spinner = null;
-        ArrayAdapter<String> spinnerAdapter = null;
-        String text_category=null;
 
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
+            View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
 
-            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
 
-            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), requestList);
-            listView.setAdapter(adapter);
+            requestsListTitle = new ArrayList<String>();
+            requestsListDetail = new HashMap<String, List<String>>();
 
+            expandableListView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            adapter = new ExpandableRequestsOffersListAdapter(getContext(), requestsListTitle, requestsListDetail);
+            expandableListView.setAdapter(adapter);
+            requestsListTitle = new ArrayList<String>();
+            requestsListDetail = new HashMap<String, List<String>>();
 
             spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                    spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
-                    requestList.clear();
-                    adapter.notifyDataSetChanged();
-                    text_category = spinner.getSelectedItem().toString();
-                    System.out.println(text_category);
-
-                    ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
-
-                    final DatabaseReference ref = handyShopDB.child("requests");
-                    Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
-
-
-                    queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot snapshot) {
-                            requestList.clear();
-                            adapter.notifyDataSetChanged();
-
-                            if (snapshot.getChildrenCount() == 0)
-                                return;
-                            else {
-                                for (DataSnapshot d : snapshot.getChildren()) {
-                                    String x = d.getKey();
-                                    Request req = d.getValue(Request.class);
-                                    if(text_category.equals("All"))
-                                    {
-
-                                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
-                                            double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
-                                            Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                            group.children.add("Category");
-                                            group.children.add(req.getCategory());
-                                            group.children.add("Subcategory");
-                                            group.children.add(req.getSubCategory());
-                                            group.children.add("Description");
-                                            group.children.add(req.getDescription());
-                                            group.children.add("Email");
-                                            group.children.add(x);
-                                            requestList.append(requestList.size(), group);
-                                            System.out.println(group.children);
-                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                            nRequestList.add(req);
-                                        }
-
-                                    }
-
-                                    else {
-                                        requestList.clear();
-                                        adapter.notifyDataSetChanged();
-                                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon() && req.getCategory().equals(text_category)) {
-                                            double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
-                                            Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                            group.children.add("Category");
-                                            group.children.add(req.getCategory());
-                                            group.children.add("Subcategory");
-                                            group.children.add(req.getSubCategory());
-                                            group.children.add("Description");
-                                            group.children.add(req.getDescription());
-                                            group.children.add("Email");
-                                            group.children.add(x);
-                                            requestList.append(requestList.size(), group);
-                                            System.out.println(group.children);
-                                            System.out.println("CAMPI");
-                                            System.out.println(group.children.get(0));
-                                            System.out.println(group.children.get(1));
-                                            System.out.println(group.children.get(2));
-                                            System.out.println(group.children.get(3));
-                                            System.out.println(group.children.get(4));
-                                            System.out.println(group.children.get(5));
-                                            System.out.println(group.children.get(6));
-                                            System.out.println(group.children.get(7));
-
-
-
-
-                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                            nRequestList.add(req);
-                                        }
-
-                                    }
-
-
-                                }
-                                adapter.notifyDataSetChanged();
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError f) {
-                        }
-                    });
-
-
+                    //spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
+                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
                 }
 
                 @Override
@@ -713,122 +614,20 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
             });
 
-
             SeekBar seekBar = (SeekBar)rootView.findViewById(R.id.seekBar_request);
             seekBar.setMax(10);
             final TextView seekBarValue = (TextView)rootView.findViewById(R.id.seekbar_title_request);
 
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress,
                                               boolean fromUser) {
 
-                    seekBarValue.setText(String.valueOf("Choice Distance Range "+progress+" km"));
-                    Radius=progress;
-
-                    {
-                        spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
-                        requestList.clear();
-                        adapter.notifyDataSetChanged();
-                        text_category = spinner.getSelectedItem().toString();
-                        System.out.println(text_category);
-
-                        ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
-
-                        final DatabaseReference ref = handyShopDB.child("requests");
-                        Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
-
-
-                        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot snapshot) {
-                                requestList.clear();
-                                adapter.notifyDataSetChanged();
-
-                                if (snapshot.getChildrenCount() == 0)
-                                    return;
-                                else {
-                                    for (DataSnapshot d : snapshot.getChildren()) {
-                                        String x = d.getKey();
-                                        Request req = d.getValue(Request.class);
-                                        if(text_category.equals("All"))
-                                        {
-
-                                            if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
-                                                double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
-                                                Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                                group.children.add("Category");
-                                                group.children.add(req.getCategory());
-                                                group.children.add("Subcategory");
-                                                group.children.add(req.getSubCategory());
-                                                group.children.add("Description");
-                                                group.children.add(req.getDescription());
-                                                group.children.add("Email");
-                                                group.children.add(x);
-                                                group.children.add("Picture");
-
-                                                requestList.append(requestList.size(), group);
-                                                System.out.println(group.children);
-                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                                nRequestList.add(req);
-                                            }
-
-                                        }
-
-                                        else {
-                                            requestList.clear();
-                                            adapter.notifyDataSetChanged();
-                                            if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon() && req.getCategory().equals(text_category)) {
-                                                double dist = computeDistance(req.getLatitude(), req.getLongitude(), latitudeRad, longitudeRad);
-                                                Group group = new Group(req.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                                group.children.add("Category");
-                                                group.children.add(req.getCategory());
-                                                group.children.add("Subcategory");
-                                                group.children.add(req.getSubCategory());
-                                                group.children.add("Description");
-                                                group.children.add(req.getDescription());
-                                                group.children.add("Email");
-                                                group.children.add(x);
-                                                group.children.add("Picture");
-                                                requestList.append(requestList.size(), group);
-                                                System.out.println(group.children);
-                                                System.out.println("CAMPI");
-                                                System.out.println(group.children.get(0));
-                                                System.out.println(group.children.get(1));
-                                                System.out.println(group.children.get(2));
-                                                System.out.println(group.children.get(3));
-                                                System.out.println(group.children.get(4));
-                                                System.out.println(group.children.get(5));
-                                                System.out.println(group.children.get(6));
-                                                System.out.println(group.children.get(7));
-
-
-
-
-                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                                nRequestList.add(req);
-                                            }
-
-                                        }
-
-
-                                    }
-                                    adapter.notifyDataSetChanged();
-                                }
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError f) {
-                            }
-                        });
-
-
-                    }
-
-
-                    }
+                    seekBarValue.setText(String.valueOf("Choice Distance Range " + progress + " km"));
+                    RadiusRequest = progress;
+                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
+                }
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
@@ -840,8 +639,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                 }
             });
-
-
             return rootView;
         }
 
@@ -849,97 +646,44 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         public void setUserVisibleHint(boolean isVisibleToUser) {
             super.setUserVisibleHint(isVisibleToUser);
             if (isVisibleToUser) {
-
-
-                ls = ((MainActivity)getActivity()).computeRadius(latitudeRad,longitudeRad,10);
-
-                final DatabaseReference ref = handyShopDB.child("requests");
-                Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
-
-                requestsList.clear();
-
-                queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-
-                        if (snapshot.getChildrenCount() == 0)
-                        {
-                            System.out.println("niente req");
-                            return;
-                        }
-                        else
-                        {
-                            System.out.println("req esistenti");
-                            for (DataSnapshot d : snapshot.getChildren()) {
-                                String x=d.getKey();
-                                System.out.println(snapshot);
-
-                                Request req = d.getValue(Request.class);
-                                if(req.getLongitude()<=ls.getMaxLon() && req.getLongitude() >= ls.getMinLon())
-                                {
-                                    double dist=computeDistance(req.getLatitude(),req.getLongitude(),latitudeRad,longitudeRad);
-
-                                    Group group = new Group(req.getTitle()+"  "+(Math.floor(dist * 100)/100)+" Km");
-
-                                    group.children.add("Category");
-                                    group.children.add(req.getCategory());
-                                    group.children.add("Subcategory");
-                                    group.children.add(req.getSubCategory());
-                                    group.children.add("Description");
-                                    group.children.add(req.getDescription());
-                                    group.children.add("Email");
-                                    group.children.add(x);
-                                    group.children.add("Picture");
-                                    requestsList.append(requestsList.size(), group);
-
-
-                                    nRequestList.add(req);
-
-                                    System.out.println("NUMERO RICHIESTE"+nRequestList.size());
-                                }
-                            }
-                            adapter.notifyDataSetChanged();
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError f) {
-                    }
-                });
-
-            }
-            else{
-                if(adapter!=null) {
-                    requestsList.clear();
+                ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
+            } else {
+                if (adapter != null) {
+                    if(requestsListDetail!=null)
+                        requestsListDetail.clear();
+                    if(requestsListTitle!=null)
+                        requestsListTitle.clear();
                     adapter.notifyDataSetChanged();
                 }
             }
 
 
         }
+
+
+
+
     }
 
 
     public static class OffersFragment extends Fragment {
-        View rootView = null;
-        SparseArray<Group> offersList = new SparseArray<Group>();
+
+        ExpandableListView expandableListView;
         ExpandableRequestsOffersListAdapter adapter;
+        List<String> offersListTitle;
+        HashMap<String, List<String>> offersListDetail;
         Spinner spinner = null;
-        ArrayAdapter<String> spinnerAdapter = null;
-        String text_category=null;
-
-
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
-            rootView = inflater.inflate(R.layout.offers, container, false);
+            View rootView = inflater.inflate(R.layout.offers, container, false);
 
-            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-
-            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), offersList);
-            listView.setAdapter(adapter);
+            offersListTitle = new ArrayList<String>();
+            offersListDetail = new HashMap<String,List<String>>();
+            expandableListView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            adapter = new ExpandableRequestsOffersListAdapter(getContext(), offersListTitle, offersListDetail);
+            expandableListView.setAdapter(adapter);
 
 
             spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter);
@@ -947,102 +691,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                    spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter);
-                    offersList.clear();
-                    adapter.notifyDataSetChanged();
-                    text_category = spinner.getSelectedItem().toString();
-                    System.out.println(text_category);
-
-                    ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
-
-                    final DatabaseReference ref = handyShopDB.child("offers");
-                    Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
-
-
-                    queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot snapshot) {
-                            offersList.clear();
-                            adapter.notifyDataSetChanged();
-
-                            if (snapshot.getChildrenCount() == 0)
-                                return;
-                            else {
-                                for (DataSnapshot d : snapshot.getChildren()) {
-                                    String x = d.getKey();
-                                    Offer off = d.getValue(Offer.class);
-                                    if(text_category.equals("All"))
-                                    {
-
-                                        if (off.getLongitude() <= ls.getMaxLon() && off.getLongitude() >= ls.getMinLon()) {
-                                            double dist = computeDistance(off.getLatitude(), off.getLongitude(), latitudeRad, longitudeRad);
-                                            Group group = new Group(off.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                            group.children.add("Category");
-                                            group.children.add(off.getCategory());
-                                            group.children.add("Subcategory");
-                                            group.children.add(off.getSubCategory());
-                                            group.children.add("Description");
-                                            group.children.add(off.getDescription());
-                                            group.children.add("Email");
-                                            group.children.add(x);
-                                            group.children.add("Picture");
-                                            offersList.append(offersList.size(), group);
-                                            System.out.println(group.children);
-                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                            nOfferList.add(off);
-                                    }
-
-                                    }
-
-                                    else {
-                                        offersList.clear();
-                                        adapter.notifyDataSetChanged();
-                                        if (off.getLongitude() <= ls.getMaxLon() && off.getLongitude() >= ls.getMinLon() && off.getCategory().equals(text_category)) {
-                                            double dist = computeDistance(off.getLatitude(), off.getLongitude(), latitudeRad, longitudeRad);
-                                            Group group = new Group(off.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                            group.children.add("Category");
-                                            group.children.add(off.getCategory());
-                                            group.children.add("Subcategory");
-                                            group.children.add(off.getSubCategory());
-                                            group.children.add("Description");
-                                            group.children.add(off.getDescription());
-                                            group.children.add("Email");
-                                            group.children.add(x);
-                                            group.children.add("Picture");
-                                            offersList.append(offersList.size(), group);
-                                            System.out.println(group.children);
-                                            System.out.println("CAMPI");
-                                            System.out.println(group.children.get(0));
-                                            System.out.println(group.children.get(1));
-                                            System.out.println(group.children.get(2));
-                                            System.out.println(group.children.get(3));
-                                            System.out.println(group.children.get(4));
-                                            System.out.println(group.children.get(5));
-                                            System.out.println(group.children.get(6));
-                                            System.out.println(group.children.get(7));
-
-
-
-
-                                            double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                            nOfferList.add(off);
-                                        }
-
-                                    }
-
-
-                                }
-                                adapter.notifyDataSetChanged();
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError f) {
-                        }
-                    });
-
-
+                    //spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
+                    ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
                 }
 
                 @Override
@@ -1051,143 +701,51 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
             });
 
-
             SeekBar seekBar = (SeekBar)rootView.findViewById(R.id.seekBar_offer);
             seekBar.setMax(10);
             final TextView seekBarValue = (TextView)rootView.findViewById(R.id.seekbar_title_offer);
 
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress,
                                               boolean fromUser) {
-                    // TODO Auto-generated method stub
-                    seekBarValue.setText(String.valueOf("Choice Distance Range "+progress+" km"));
-                    Radius=progress;
 
-                    {
-                        spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter);
-                        offersList.clear();
-                        adapter.notifyDataSetChanged();
-                        text_category = spinner.getSelectedItem().toString();
-                        System.out.println(text_category);
-
-                        ls = ((MainActivity) getActivity()).computeRadius(latitudeRad, longitudeRad, Radius);
-
-                        final DatabaseReference ref = handyShopDB.child("offers");
-                        Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
-
-
-                        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot snapshot) {
-                                offersList.clear();
-                                adapter.notifyDataSetChanged();
-
-                                if (snapshot.getChildrenCount() == 0)
-                                    return;
-                                else {
-                                    for (DataSnapshot d : snapshot.getChildren()) {
-                                        String x = d.getKey();
-                                        Offer off = d.getValue(Offer.class);
-                                        if(text_category.equals("All"))
-                                        {
-
-                                            if (off.getLongitude() <= ls.getMaxLon() && off.getLongitude() >= ls.getMinLon()) {
-                                                double dist = computeDistance(off.getLatitude(), off.getLongitude(), latitudeRad, longitudeRad);
-                                                Group group = new Group(off.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                                group.children.add("Category");
-                                                group.children.add(off.getCategory());
-                                                group.children.add("Subcategory");
-                                                group.children.add(off.getSubCategory());
-                                                group.children.add("Description");
-                                                group.children.add(off.getDescription());
-                                                group.children.add("Email");
-                                                group.children.add(x);
-                                                group.children.add("Picture");
-                                                offersList.append(offersList.size(), group);
-                                                System.out.println(group.children);
-                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                                nOfferList.add(off);
-                                            }
-
-                                        }
-
-                                        else {
-                                            offersList.clear();
-                                            adapter.notifyDataSetChanged();
-                                            if (off.getLongitude() <= ls.getMaxLon() && off.getLongitude() >= ls.getMinLon() && off.getCategory().equals(text_category)) {
-                                                double dist = computeDistance(off.getLatitude(), off.getLongitude(), latitudeRad, longitudeRad);
-                                                Group group = new Group(off.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
-                                                group.children.add("Category");
-                                                group.children.add(off.getCategory());
-                                                group.children.add("Subcategory");
-                                                group.children.add(off.getSubCategory());
-                                                group.children.add("Description");
-                                                group.children.add(off.getDescription());
-                                                group.children.add("Email");
-                                                group.children.add(x);
-                                                group.children.add("Picture");
-                                                offersList.append(offersList.size(), group);
-                                                System.out.println(group.children);
-                                                System.out.println("CAMPI");
-                                                System.out.println(group.children.get(0));
-                                                System.out.println(group.children.get(1));
-                                                System.out.println(group.children.get(2));
-                                                System.out.println(group.children.get(3));
-                                                System.out.println(group.children.get(4));
-                                                System.out.println(group.children.get(5));
-                                                System.out.println(group.children.get(6));
-                                                System.out.println(group.children.get(7));
-
-
-
-
-                                                double dist2 = computeDistance(latitude, longitude, latitude + 20, longitude + 50);
-                                                nOfferList.add(off);
-                                            }
-
-                                        }
-
-
-                                    }
-                                    adapter.notifyDataSetChanged();
-                                }
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError f) {
-                            }
-                        });
-
-
-                    }
-
+                    seekBarValue.setText(String.valueOf("Choice Distance Range " + progress + " km"));
+                    RadiusOffer=progress;
+                    ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
                 }
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-                    // TODO Auto-generated method stub
+
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    // TODO Auto-generated method stub
+
                 }
             });
 
-
-        return rootView;
+            return rootView;
         }
 
         @Override
         public void setUserVisibleHint(boolean isVisibleToUser) {
+
             super.setUserVisibleHint(isVisibleToUser);
 
             if (isVisibleToUser) {
-
+                ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
+            } else {
+                if(adapter!=null) {
+                    offersListDetail.clear();
+                    offersListTitle.clear();
+                    adapter.notifyDataSetChanged();
+                }
             }
+
+
         }
     }
 
@@ -1275,51 +833,38 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         }
     }
 
-
     public static class ActivityFragment extends Fragment {
 
-        SparseArray<Group> activitiesList = new SparseArray<Group>();
-        ExpandableRequestsOffersListAdapter adapter;
+        ArrayList<Group> activitiesList = new ArrayList<>();
+        ExpandableActivitiesListAdapter adapter;
 
         public void getActivities(final String type){
             final DatabaseReference ref = handyShopDB.child(type);
             Query queryRef = ref.orderByChild("userId").equalTo(id);
-
             queryRef.addListenerForSingleValueEvent(new
 
-            ValueEventListener() {
-                @Override
-                public void onDataChange (DataSnapshot snapshot){
+                                                            ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange (DataSnapshot snapshot){
 
-                    if (snapshot.getChildrenCount() == 0)
-                        return;
-                    else {
-                        for (DataSnapshot d : snapshot.getChildren()) {
+                                                                    if (snapshot.getChildrenCount() == 0)
+                                                                        return;
+                                                                    else {
+                                                                        for (DataSnapshot d : snapshot.getChildren()) {
+                                                                            Request req = d.getValue(Request.class);
+                                                                            //((MainActivity)getActivity()).addToList(activitiesList, req);
 
-                            if(type=="requests") {
-                                Request req = d.getValue(Request.class);
-                                //System.out.println(request.toString());
-                                Group group = new Group(req.getCategory());
-                                group.children.add(req.getDescription());
-                                activitiesList.append(activitiesList.size(), group);
-                            }
-                            else{
-                                Offer off = d.getValue(Offer.class);
-                                Group group = new Group(off.getCategory());
-                                group.children.add(off.getDescription());
-                                activitiesList.append(activitiesList.size(), group);
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
+                                                                        }
+                                                                        adapter.notifyDataSetChanged();
+                                                                    }
 
-                }
+                                                                }
 
-                @Override
-                public void onCancelled (DatabaseError f){
-                }
-            });
-         }
+                                                                @Override
+                                                                public void onCancelled (DatabaseError f){
+                                                                }
+                                                            });
+        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -1328,7 +873,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             rootView = inflater.inflate(R.layout.activities, container, false);
 
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new ExpandableRequestsOffersListAdapter(getActivity(), activitiesList);
+            adapter = new ExpandableActivitiesListAdapter(getActivity(), activitiesList);
             listView.setAdapter(adapter);
             return rootView;
         }
@@ -1340,11 +885,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                 activitiesList.clear();
                 getActivities("requests");
-                //getActivities("offers");
+                getActivities("offers");
             }
 
         }
     }
+
 
     public void sendRequest(View view) {
 
@@ -1418,30 +964,95 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     }
 
     public void checkIfLogged(View v){
-        Button insert_button;
         LinearLayout layout;
         GridLayout grid;
         if(v!=null) {
-            insert_button = (Button) v.findViewById(R.id.insert_button);
             layout = (LinearLayout) v.findViewById(R.id.header_home);
             grid =(GridLayout) v.findViewById(R.id.middle_home);
         }
         else{
-            insert_button = (Button) findViewById(R.id.insert_button);
             layout = (LinearLayout) findViewById(R.id.header_home);
             grid =(GridLayout) findViewById(R.id.middle_home);
         }
-        if (accessToken == null) {
+        if (accessToken == null && grid!=null && layout!=null) {
             mViewPager.setPagingEnabled(false);
             layout.setVisibility(View.INVISIBLE);
             grid.setVisibility(View.INVISIBLE);
 
         } else {
             mViewPager.setPagingEnabled(true);
-            grid.setVisibility(View.VISIBLE);
-            layout.setVisibility(View.VISIBLE);
+            if(grid!=null && layout!=null) {
+                grid.setVisibility(View.VISIBLE);
+                layout.setVisibility(View.VISIBLE);
+            }
         }
     }
+
+    public void addToList(List<String> listTitle, HashMap<String, List<String>> listDetail, Request q){
+        double dist = computeDistance(q.getLatitude(), q.getLongitude(), latitudeRad, longitudeRad);
+
+        List<String> details = new ArrayList<String>();
+        details.add("Category");
+        details.add(q.getCategory());
+        details.add("Subcategory");
+        details.add(q.getSubCategory());
+        details.add("Description");
+        details.add(q.getDescription());
+        details.add("Email");
+        details.add("email");
+
+        System.out.println(details);
+
+        String title = q.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km";
+        listDetail.put(title,details);
+
+        System.out.println("LIST DETAIL"+listDetail.get(title));
+
+        listTitle = new ArrayList<String>(listDetail.keySet());
+        //TODO prendere la mail dall id dell utente
+
+    }
+    public void updateList(String type, final ExpandableRequestsOffersListAdapter adapter, final List<String> listTitle, final HashMap<String, List<String>> listDetail, Spinner spinner){
+        final String text_category = spinner.getSelectedItem().toString();
+
+        if(type=="requests")
+            ls = computeRadius(latitudeRad, longitudeRad, RadiusRequest);
+        else
+            ls = computeRadius(latitudeRad, longitudeRad, RadiusOffer);
+        final DatabaseReference ref = handyShopDB.child(type);
+        Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
+
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                listTitle.clear();
+                if(listDetail!=null)
+                    listDetail.clear();
+                adapter.notifyDataSetChanged();
+
+                if (snapshot.getChildrenCount() == 0)
+                    return;
+                else {
+                    for (DataSnapshot d : snapshot.getChildren()) {
+                        Request req = d.getValue(Request.class);
+                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
+                            if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category)))
+                                addToList(listTitle, listDetail, req);
+
+                        }
+                        //nRequestList.add(req);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError f) {
+            }
+        });
+    }
+
 }
 
 
