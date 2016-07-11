@@ -574,38 +574,31 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     }
 
+
+
     public static class RequestsFragment extends Fragment {
 
-        ExpandableListView expandableListView;
-        ExpandableRequestsOffersListAdapter adapter;
-        List<String> requestsListTitle= null;
-        HashMap<String, List<String>> requestsListDetail;
+        ArrayList<Group> requestsList = new ArrayList<Group>();
         Spinner spinner = null;
-
+        ExpandableRequestsOffersListAdapter adapter;
+        ArrayAdapter<String> spinnerAdapter = null;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             View rootView = null;
             rootView = inflater.inflate(R.layout.requests, container, false);
-
-
-            requestsListTitle = new ArrayList<String>();
-            requestsListDetail = new HashMap<String, List<String>>();
-
-            expandableListView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new ExpandableRequestsOffersListAdapter(getContext(), requestsListTitle, requestsListDetail);
-            expandableListView.setAdapter(adapter);
-            requestsListTitle = new ArrayList<String>();
-            requestsListDetail = new HashMap<String, List<String>>();
-
+            //list = buildData();
+            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            adapter = new ExpandableRequestsOffersListAdapter(getContext(), requestsList);
+            listView.setAdapter(adapter);
             spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                     //spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
-                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
+                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsList, spinner);
                 }
 
                 @Override
@@ -626,7 +619,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                     seekBarValue.setText(String.valueOf("Choice Distance Range " + progress + " km"));
                     RadiusRequest = progress;
-                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
+                    ((MainActivity) getActivity()).updateList("requests", adapter, requestsList, spinner);
                 }
 
                 @Override
@@ -646,32 +639,23 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         public void setUserVisibleHint(boolean isVisibleToUser) {
             super.setUserVisibleHint(isVisibleToUser);
             if (isVisibleToUser) {
-                ((MainActivity) getActivity()).updateList("requests", adapter, requestsListTitle, requestsListDetail, spinner);
+                ((MainActivity) getActivity()).updateList("requests", adapter, requestsList, spinner);
             } else {
                 if (adapter != null) {
-                    if(requestsListDetail!=null)
-                        requestsListDetail.clear();
-                    if(requestsListTitle!=null)
-                        requestsListTitle.clear();
+                    requestsList.clear();
                     adapter.notifyDataSetChanged();
                 }
             }
 
 
         }
-
-
-
-
     }
 
 
     public static class OffersFragment extends Fragment {
 
-        ExpandableListView expandableListView;
+        ArrayList<Group> offersList = new ArrayList<Group>();
         ExpandableRequestsOffersListAdapter adapter;
-        List<String> offersListTitle;
-        HashMap<String, List<String>> offersListDetail;
         Spinner spinner = null;
 
         @Override
@@ -679,20 +663,16 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             Bundle args = getArguments();
             View rootView = inflater.inflate(R.layout.offers, container, false);
 
-            offersListTitle = new ArrayList<String>();
-            offersListDetail = new HashMap<String,List<String>>();
-            expandableListView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new ExpandableRequestsOffersListAdapter(getContext(), offersListTitle, offersListDetail);
-            expandableListView.setAdapter(adapter);
-
-
+            ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
+            adapter = new ExpandableRequestsOffersListAdapter(getContext(), offersList);
+            listView.setAdapter(adapter);
             spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter);
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                     //spinner = (Spinner) rootView.findViewById(R.id.category_choice_filter_request);
-                    ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
+                    ((MainActivity) getActivity()).updateList("offers", adapter, offersList, spinner);
                 }
 
                 @Override
@@ -713,7 +693,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
                     seekBarValue.setText(String.valueOf("Choice Distance Range " + progress + " km"));
                     RadiusOffer=progress;
-                    ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
+                    ((MainActivity) getActivity()).updateList("offers", adapter, offersList, spinner);
                 }
 
                 @Override
@@ -736,11 +716,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             super.setUserVisibleHint(isVisibleToUser);
 
             if (isVisibleToUser) {
-                ((MainActivity) getActivity()).updateList("offers", adapter, offersListTitle, offersListDetail, spinner);
+                ((MainActivity) getActivity()).updateList("offers", adapter, offersList, spinner);
             } else {
                 if(adapter!=null) {
-                    offersListDetail.clear();
-                    offersListTitle.clear();
+                    offersList.clear();
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -988,31 +967,18 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         }
     }
 
-    public void addToList(List<String> listTitle, HashMap<String, List<String>> listDetail, Request q){
+
+    public void addToList(ArrayList<Group> list, Request q){
         double dist = computeDistance(q.getLatitude(), q.getLongitude(), latitudeRad, longitudeRad);
-
-        List<String> details = new ArrayList<String>();
-        details.add("Category");
-        details.add(q.getCategory());
-        details.add("Subcategory");
-        details.add(q.getSubCategory());
-        details.add("Description");
-        details.add(q.getDescription());
-        details.add("Email");
-        details.add("email");
-
-        System.out.println(details);
-
-        String title = q.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km";
-        listDetail.put(title,details);
-
-        System.out.println("LIST DETAIL"+listDetail.get(title));
-
-        listTitle = new ArrayList<String>(listDetail.keySet());
+        Group group = new Group(q.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+        group.children.add("CATEGORY: "+q.getCategory());
+        group.children.add("SUBCATEGORY: "+q.getSubCategory());
+        group.children.add("DESCRIPTION: "+q.getDescription());
         //TODO prendere la mail dall id dell utente
-
+        group.children.add("EMAIL: trignoleo@");
+        list.add(list.size(), group);
     }
-    public void updateList(String type, final ExpandableRequestsOffersListAdapter adapter, final List<String> listTitle, final HashMap<String, List<String>> listDetail, Spinner spinner){
+    public void updateList(String type, final ExpandableRequestsOffersListAdapter adapter, final ArrayList<Group> list, Spinner spinner){
         final String text_category = spinner.getSelectedItem().toString();
 
         if(type=="requests")
@@ -1025,9 +991,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                listTitle.clear();
-                if(listDetail!=null)
-                    listDetail.clear();
+                list.clear();
                 adapter.notifyDataSetChanged();
 
                 if (snapshot.getChildrenCount() == 0)
@@ -1037,7 +1001,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                         Request req = d.getValue(Request.class);
                         if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
                             if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category)))
-                                addToList(listTitle, listDetail, req);
+                                addToList(list, req);
 
                         }
                         //nRequestList.add(req);
@@ -1052,6 +1016,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             }
         });
     }
+
 
 }
 

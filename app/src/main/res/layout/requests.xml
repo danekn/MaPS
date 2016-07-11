@@ -1,15 +1,12 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/req"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="1dp"
-    android:paddingRight="1dp"
-    android:paddingTop="2dp"
-    android:paddingBottom="2dp"
-    android:id="@+id/req"
-    tools:context=".MainActivity">
-
-
+    tools:context=".MainActivity"
+    android:gravity="fill_vertical"
+    android:orientation="vertical"
+    android:weightSum="1">
 
 
     <TextView
@@ -22,7 +19,7 @@
         android:textStyle="bold"/>
 
     <Spinner
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/category_choice_filter_request"
         android:layout_weight="0.03"
@@ -53,14 +50,13 @@
         android:layout_weight="0.03"
         android:textStyle="bold"/>
 
-
     <ExpandableListView
         android:id="@+id/listView"
-        android:layout_height="375dp"
-        android:layout_width="match_parent"
-        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp" />
+        android:layout_width="wrap_content"
+        android:layout_height="340dp"
+        android:groupIndicator="@null">
+    </ExpandableListView>
 
-</RelativeLayout>
+
+</LinearLayout>
 
