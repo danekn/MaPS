@@ -14,8 +14,10 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import java.io.IOException;
 import java.util.Arrays;
 
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -90,7 +92,7 @@ import java.util.List;
 
 
 public class MainActivity extends FragmentActivity implements LocationListener {
-
+    private int PICK_IMAGE_REQUEST = 1;
     static public double RadiusOffer=10;
     static public double RadiusRequest=10;
     static DatabaseReference handyShopDB;
@@ -337,9 +339,31 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-        checkIfLogged(null);
+
+        if (requestCode == PICK_IMAGE_REQUEST ) {
+            if(resultCode == RESULT_OK && data != null && data.getData() != null) {
+                Uri uri = data.getData();
+
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                    // Log.d(TAG, String.valueOf(bitmap));
+
+                    ImageView imageView = (ImageView) findViewById(R.id.imageGallery);
+                    imageView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+            checkIfLogged(null);
+        }
+
+
     }
 
 
@@ -909,6 +933,18 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 break;
             default:
         }
+
+    }
+
+
+    public void getImage(View view){
+
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        // Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
     }
 
