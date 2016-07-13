@@ -1,15 +1,29 @@
-<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/textView1"
-    android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:layout_marginLeft="8dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/test"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    android:gravity="left"
-    android:paddingLeft="10dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:text="Test"
-    android:textSize="17sp"
-
+    <ImageView
+    android:id="@+id/imageReqOff"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:background="@null"
+    android:layout_marginTop="8dp"
     />
+
+    <CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_marginLeft="110dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Test"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        />
+
+</RelativeLayout>

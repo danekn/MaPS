@@ -4,11 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:gravity="fill_vertical"
     android:orientation="vertical"
-    android:weightSum="1">
-
-
+    android:weightSum="1"
+    android:background="@drawable/reqoff">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,7 +15,6 @@
         android:id="@+id/filter_title"
         android:layout_weight="0.03"
         android:textStyle="bold"/>
-
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,13 +31,10 @@
         android:id="@+id/seekbar_title_request"
         android:layout_weight="0.03"
         android:textStyle="bold"/>
-
     <SeekBar
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/seekBar_request" />
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,10 +47,21 @@
     <ExpandableListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
-        android:layout_height="340dp"
-        android:groupIndicator="@null">
+        android:layout_height="274dp"
+        android:groupIndicator="@null"
+        android:layout_weight="0.63">
     </ExpandableListView>
 
-
+    <Button
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show in Map"
+        android:id="@+id/mapOfferButton"
+        android:onClick="openMap"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp">
+    </Button>
 </LinearLayout>
-

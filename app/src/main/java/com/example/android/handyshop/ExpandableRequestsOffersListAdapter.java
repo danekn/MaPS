@@ -2,6 +2,9 @@ package com.example.android.handyshop;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StreamDownloadTask;
+
 import java.util.ArrayList;
 
 public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapter {
@@ -19,11 +27,17 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
     private final ArrayList<Group> groups;
     public Context context;
 
-
     public ExpandableRequestsOffersListAdapter(Context context, ArrayList<Group> groups) {
         this.context = context;
         this.groups = groups;
 
+    }
+    private static class ViewHolder
+    {
+        CheckedTextView title;
+        TextView description;
+        ImageView image;
+        ImageButton addItem;
     }
 
     @Override
@@ -33,20 +47,24 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-        return 0;
+        return childPosition;
     }
 
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String children = (String) getChild(groupPosition, childPosition);
+
         if (convertView==null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
             convertView = inflater.inflate(R.layout.listrow_details_content, null);
-            System.out.println("CHILD N: "+childPosition+" GROUP N: "+groupPosition+" CHILDREN"+children);
+
         }
-        TextView description = (TextView) convertView.findViewById(R.id.detail_content);
+
+        TextView description = (TextView) convertView.findViewById(R.id.detail);
         description.setText(children);
+
         return convertView;
     }
 
@@ -77,21 +95,39 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
 
     @Override
     public long getGroupId(int groupPosition) {
-        return 0;
+        return groupPosition;
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
-
+    public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        final ViewHolder holder;
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.listrow_group_req_off, null);
-        }
 
+        }
         Group group = (Group) getGroup(groupPosition);
+        final Bitmap bmp;
         CheckedTextView title = (CheckedTextView)convertView.findViewById(R.id.textView1);
-        title.setText(group.string);
+        int i = group.string.indexOf("?");
+        final String t = group.string.substring(0,i);
+        final ImageView imageView= (ImageView) convertView.findViewById(R.id.imageReqOff);
+        title.setText(t+group.string.substring(i+1,group.string.length()));
+        final StorageReference imagesRef = (MainActivity.storageRef).child("images/"+MainActivity.id+t+".jpeg");
+        imagesRef.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+
+                Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                imageView.setImageBitmap(bmp);
+                System.out.println("sss");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                System.out.println("ERRORE!!!! "+imagesRef);
+            }
+        });
         return convertView;
     }
 
@@ -104,6 +140,4 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return false;
     }
-
-
 }

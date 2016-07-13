@@ -16,19 +16,4 @@
         android:textStyle="bold">
     </TextView>
 
-    <TextView
-        android:id="@+id/detail_title"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:drawablePadding="5dp"
-        android:gravity="center_vertical"
-        android:textStyle="bold"
-        android:text="ooo">
-    </TextView>
-
-
-
-
-
-
 </LinearLayout>

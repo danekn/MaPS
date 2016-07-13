@@ -3,8 +3,8 @@
     android:id="@+id/act"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    tools:context=".MainActivity" >
-
+    tools:context=".MainActivity"
+    android:background="@drawable/activity">
     <ExpandableListView
         android:id="@+id/listView"
         android:layout_width="match_parent"

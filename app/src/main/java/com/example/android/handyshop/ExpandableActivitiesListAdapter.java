@@ -40,22 +40,11 @@ public class ExpandableActivitiesListAdapter extends BaseExpandableListAdapter {
         TextView text = null;
         if (convertView == null) {
 
-            if (childPosition%2 == 0) {
-                convertView = inflater.inflate(R.layout.listrow_details_titles, null);
-                text = (TextView) convertView.findViewById(R.id.detail_title);
-                text.setText(children);
-
-
-            }
-            else {
                 convertView = inflater.inflate(R.layout.listrow_details_content, null);
-                text = (TextView) convertView.findViewById(R.id.detail_content);
-                text.setText(children);
 
-
-            }
         }
-
+        text = (TextView) convertView.findViewById(R.id.detail);
+        text.setText(children);
 
         return convertView;
     }

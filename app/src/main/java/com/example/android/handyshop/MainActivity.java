@@ -1,6 +1,9 @@
 package com.example.android.handyshop;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +27,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -59,9 +63,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.android.gms.appindexing.Action;
@@ -89,14 +95,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MainActivity extends FragmentActivity implements LocationListener {
     private int PICK_IMAGE_REQUEST = 1;
+    public static int DELETE_ITEM = 666;
     static public double RadiusOffer=10;
     static public double RadiusRequest=10;
     static DatabaseReference handyShopDB;
     CollectionPagerAdapter myCollectionPagerAdapter;
+
+    static Bitmap bitmap;
 
     static CustomViewPager mViewPager;
 
@@ -106,10 +118,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static double longitudeRad;
     static String id;
     static LocationStruct ls = null;
+
     static List<Request> nRequestList = null;
     static List<Offer> nOfferList=null;
 
-
+    static ArrayList<Group> activitiesList = null;
+    static ExpandableActivitiesListAdapter adapteract;
 
 
     public static StorageReference storageRef=null;
@@ -122,11 +136,14 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static AccessTokenTracker accessTokenTracker = null;
     private GoogleApiClient client;
 
+    static boolean tmp;
+
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        onNewIntent(getIntent());
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 100, this);
@@ -158,7 +175,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         /* Creating Storage for image */
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReferenceFromUrl("gs://amber-torch-5366.appspot.com");
-        imagesRef = storageRef.child("images/logo.png");
+
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
@@ -342,12 +359,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST ) {
-            if(resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == PICK_IMAGE_REQUEST) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 Uri uri = data.getData();
 
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                     // Log.d(TAG, String.valueOf(bitmap));
 
                     ImageView imageView = (ImageView) findViewById(R.id.imageGallery);
@@ -356,24 +373,47 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     e.printStackTrace();
                 }
             }
+        } else {
+            if (requestCode == DELETE_ITEM) {
+                System.out.println("APPOST ");
+
+
+                // This pending intent will open after notification click
+                /*
+                PendingIntent i=PendingIntent.getActivity(this, 0,
+                        new Intent(this, NotifyMessage.class),
+                        0);
+
+                note.setLatestEventInfo(this, "Android Example Notification Title",
+                        "This is the android example notification message", i);
+
+                //After uncomment this line you will see number of notification arrived
+                //note.number=2;
+                mgr.notify(NOTIFY_ME_ID, note);
+                */
+
+                callbackManager.onActivityResult(requestCode, resultCode, data);
+                checkIfLogged(null);
+            }
+
+
         }
-        else {
-
-            callbackManager.onActivityResult(requestCode, resultCode, data);
-            checkIfLogged(null);
-        }
-
-
     }
 
 
-    public static class HomeFragment extends Fragment {
-        Button insert_button = null;
-        Button telegram_button=null;
-        Button upload_button=null;
-        View rootView = null;
-        Button download_button=null;
+    @Override
+    public void onNewIntent(Intent intent) {
+        String str=intent.getStringExtra("dane");
+        System.out.println(str);
+    }
 
+
+
+
+    public static class HomeFragment extends Fragment {
+
+        Button telegram_button=null;
+        View rootView = null;
         String name = null;
         String email = null;
 
@@ -381,17 +421,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
             rootView = inflater.inflate(R.layout.home, container, false);
-            insert_button = (Button) rootView.findViewById(R.id.insert_button);
-            insert_button.setOnClickListener(insert);
-
-            upload_button = (Button) rootView.findViewById(R.id.upload);
-            upload_button.setOnClickListener(uploadImg);
-
-            download_button = (Button) rootView.findViewById(R.id.download_img);
-            download_button.setOnClickListener(download_img);
-
-            telegram_button= (Button) rootView.findViewById(R.id.telegram_chat);
-            telegram_button.setOnClickListener(telegram_mes);
 
 
             LoginButton loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
@@ -461,10 +490,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 }
             });
 
-
-
-
-
             return rootView;
         }
 
@@ -500,66 +525,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             }
         }
 
-        View.OnClickListener insert = new View.OnClickListener() {
-            public void onClick(View v) {
 
-                Intent intent = new Intent(getActivity(), MapsActivity.class);
-                Bundle args = new Bundle();
-                if(nRequestList!=null) {
-                    args.putSerializable("REQUESTLIST", (Serializable) nRequestList);
-                }
-
-                if(nOfferList!=null) {
-                    args.putSerializable("OFFERLIST", (Serializable) nOfferList);
-                }
-
-                String lat2 = String.valueOf(latitude);
-                String lon2 = String.valueOf(longitude);
-                args.putString("MYLATITUDE",lat2);
-                args.putString("MYLONGITUDE",lon2);
-
-                intent.putExtra("BUNDLE",args);
-
-                startActivity(intent);
-
-            }
-        };
-
-
-        View.OnClickListener uploadImg = new View.OnClickListener() {
-            public void onClick(View v) {
-
-                System.out.println(imagesRef);
-
-                ImageView imageView= (ImageView) rootView.findViewById(R.id.imageLogo);
-                imageView.setDrawingCacheEnabled(true);
-                imageView.buildDrawingCache();
-                Bitmap bitmap = imageView.getDrawingCache();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] data = baos.toByteArray();
-
-
-                UploadTask uploadTask = imagesRef.putBytes(data);
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-
-                    }
-                });
-
-            }
-        };
-
-
-        View.OnClickListener download_img = new View.OnClickListener() {
+        /*View.OnClickListener download_img = new View.OnClickListener() {
             public void onClick(View v) {
 
                 imagesRef.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
@@ -579,20 +546,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             }
         };
 
-
-        View.OnClickListener telegram_mes = new View.OnClickListener() {
-            public void onClick(View v) {
-                final String appName = "org.telegram.messenger";
-                String msg="ciao";
-                Intent myIntent = new Intent(Intent.ACTION_SEND);
-                myIntent.setType("text/plain");
-                myIntent.setPackage(appName);
-                myIntent.putExtra(Intent.EXTRA_TEXT, msg);//
-                startActivity(Intent.createChooser(myIntent, "Share with"));
-
-
-            }
-        };
+        */
 
 
 
@@ -838,46 +792,18 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     public static class ActivityFragment extends Fragment {
 
-        ArrayList<Group> activitiesList = new ArrayList<>();
-        ExpandableActivitiesListAdapter adapter;
 
-        public void getActivities(final String type){
-            final DatabaseReference ref = handyShopDB.child(type);
-            Query queryRef = ref.orderByChild("userId").equalTo(id);
-            queryRef.addListenerForSingleValueEvent(new
-
-                                                            ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange (DataSnapshot snapshot){
-
-                                                                    if (snapshot.getChildrenCount() == 0)
-                                                                        return;
-                                                                    else {
-                                                                        for (DataSnapshot d : snapshot.getChildren()) {
-                                                                            Request req = d.getValue(Request.class);
-                                                                            //((MainActivity)getActivity()).addToList(activitiesList, req);
-
-                                                                        }
-                                                                        adapter.notifyDataSetChanged();
-                                                                    }
-
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled (DatabaseError f){
-                                                                }
-                                                            });
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             View rootView = null;
+            activitiesList = new ArrayList<>();
             rootView = inflater.inflate(R.layout.activities, container, false);
 
             ExpandableListView listView = (ExpandableListView) rootView.findViewById(R.id.listView);
-            adapter = new ExpandableActivitiesListAdapter(getActivity(), activitiesList);
-            listView.setAdapter(adapter);
+            adapteract = new ExpandableActivitiesListAdapter(getActivity(), activitiesList);
+            listView.setAdapter(adapteract);
             return rootView;
         }
 
@@ -887,8 +813,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             if (isVisibleToUser) {
 
                 activitiesList.clear();
-                getActivities("requests");
-                getActivities("offers");
+                ((MainActivity)getActivity()).getActivities("requests");
+                ((MainActivity)getActivity()).getActivities("offers");
             }
 
         }
@@ -924,18 +850,86 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 DatabaseReference ref = handyShopDB.child("offers");
                 Request req = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad);
                 ref.push().setValue(req);
+
+                uploadImg(id,title);
                 break;
 
             case "Request":
                 DatabaseReference re = handyShopDB.child("requests");
                 Request rq = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad);
                 re.push().setValue(rq);
+                uploadImg(id,title);
                 break;
             default:
         }
 
     }
 
+    public void getActivities(final String type){
+        final DatabaseReference ref = handyShopDB.child(type);
+        Query queryRef = ref.orderByChild("userId").equalTo(id);
+        queryRef.addListenerForSingleValueEvent(new
+
+                                                        ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange (DataSnapshot snapshot){
+
+                                                                if (snapshot.getChildrenCount() == 0)
+                                                                    return;
+                                                                else {
+                                                                    for (DataSnapshot d : snapshot.getChildren()) {
+                                                                        Request req = d.getValue(Request.class);
+                                                                        addToList(activitiesList, req, 1);
+
+                                                                    }
+                                                                    adapteract.notifyDataSetChanged();
+                                                                }
+
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled (DatabaseError f){
+                                                            }
+                                                        });
+    }
+
+
+    public void uploadImg(String id, String title){
+
+            imagesRef = storageRef.child("images/"+id+title+".jpeg");
+            System.out.println(imagesRef);
+            ImageView imageView= (ImageView) findViewById(R.id.imageGallery);
+            imageView.setDrawingCacheEnabled(true);
+            imageView.buildDrawingCache();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, baos);
+            byte[] data = baos.toByteArray();
+
+
+            UploadTask uploadTask = imagesRef.putBytes(data);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+
+                    Toast.makeText(MainActivity.this, "Unsuccessful Insertion! Please try later!",
+                            Toast.LENGTH_LONG).show();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    Toast.makeText(MainActivity.this, "Successful Insertion!"+downloadUrl,
+                            Toast.LENGTH_LONG).show();
+                    ImageView myImageView = (ImageView)findViewById(R.id.imageGallery);
+                    myImageView.setImageResource(R.drawable.noimageicon);
+
+
+
+                }
+            });
+
+        }
 
     public void getImage(View view){
 
@@ -1004,23 +998,37 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     }
 
 
-    public void addToList(ArrayList<Group> list, Request q){
+    public void addToList(ArrayList<Group> list, Request q, int i){
         double dist = computeDistance(q.getLatitude(), q.getLongitude(), latitudeRad, longitudeRad);
-        Group group = new Group(q.getTitle() + "  " + (Math.floor(dist * 100) / 100) + " Km");
+        Group group;
+        if(i==0)
+            group = new Group(q.getTitle() +"?"+ "  " + (Math.floor(dist * 100) / 100) + " Km");
+        else
+            group = new Group(q.getTitle());
         group.children.add("CATEGORY: "+q.getCategory());
         group.children.add("SUBCATEGORY: "+q.getSubCategory());
         group.children.add("DESCRIPTION: "+q.getDescription());
         //TODO prendere la mail dall id dell utente
-        group.children.add("EMAIL: trignoleo@");
+        group.children.add("EMAIL: "+"email");
         list.add(list.size(), group);
     }
-    public void updateList(String type, final ExpandableRequestsOffersListAdapter adapter, final ArrayList<Group> list, Spinner spinner){
-        final String text_category = spinner.getSelectedItem().toString();
 
-        if(type=="requests")
+    public void updateList(final String type, final ExpandableRequestsOffersListAdapter adapter, final ArrayList<Group> list, Spinner spinner){
+        final String text_category = spinner.getSelectedItem().toString();
+    System.out.println(type);
+        if(type=="requests") {
             ls = computeRadius(latitudeRad, longitudeRad, RadiusRequest);
-        else
+            nOfferList=null;
+            if(nRequestList==null)
+                nRequestList = new ArrayList<Request>();
+        }
+        else {
             ls = computeRadius(latitudeRad, longitudeRad, RadiusOffer);
+            nRequestList = null;
+            if (nOfferList == null)
+                nOfferList = new ArrayList<Offer>();
+        }
+
         final DatabaseReference ref = handyShopDB.child(type);
         Query queryRef = ref.orderByChild("latitude").startAt(ls.getMinLat()).endAt(ls.getMaxLat());
 
@@ -1036,11 +1044,19 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                     for (DataSnapshot d : snapshot.getChildren()) {
                         Request req = d.getValue(Request.class);
                         if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
-                            if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category)))
-                                addToList(list, req);
+                            if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category))){
+                                if (type=="requests"){
+                                    nRequestList.add(req);
+                                }
+                                else {
+                                    Offer off = d.getValue(Offer.class);
+                                    nOfferList.add(off);
+                                }
+                                addToList(list, req, 0);
+                            }
 
                         }
-                        //nRequestList.add(req);
+
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -1053,6 +1069,166 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         });
     }
 
+    public static boolean removeChild(final String type, final String title){
+        final DatabaseReference ref = handyShopDB.child(type);
+        tmp=false;
+        Query queryRef = ref.orderByChild("userId").equalTo(id);
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange (DataSnapshot snapshot){
+                if (snapshot.getChildrenCount() > 0)
+                {
+                    for (DataSnapshot d : snapshot.getChildren()) {
+                        Request req = d.getValue(Request.class);
+                        if (req.getTitle()==title){
+                            handyShopDB.child(type+"/"+d.getKey()).removeValue();
+                            tmp=true;
+                        }
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled (DatabaseError f){
+            }
+        });
+        return tmp;
+    }
+
+    public void deleteChild(View v){
+        RelativeLayout vwParentRow = (RelativeLayout)v.getParent();
+        TextView child = (TextView)vwParentRow.getChildAt(0);
+
+        if(!removeChild("requests", (String)child.getText()))
+            removeChild("offers", (String)child.getText());
+        for(int i=0; i<activitiesList.size();i++){
+            Group g = activitiesList.get(i);
+            if(g.string==child.getText())
+                activitiesList.remove(i);
+        }
+        adapteract.notifyDataSetChanged();
+    }
+
+
+    public void openMap (View v){
+
+        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+        Bundle args = new Bundle();
+        if(nRequestList!=null) {
+            args.putSerializable("REQUESTLIST", (Serializable) nRequestList);
+        }
+
+        if(nOfferList!=null) {
+            args.putSerializable("OFFERLIST", (Serializable) nOfferList);
+        }
+
+        String lat2 = String.valueOf(latitude);
+        String lon2 = String.valueOf(longitude);
+        args.putString("MYLATITUDE",lat2);
+        args.putString("MYLONGITUDE",lon2);
+
+        intent.putExtra("BUNDLE",args);
+
+        startActivity(intent);
+
+    }
+
+
+    public void telecazzo(View v) {
+       /* Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, "addresses");
+
+        setResult(DELETE_ITEM, intent);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), DELETE_ITEM);
+
+
+        }*/
+        Intent telegram = new Intent(Intent.ACTION_VIEW , Uri.parse("https://telegram.me/Porcodio"));
+        startActivity(telegram);
+    }
+
+    public void saveFeedback(View v) {
+
+        String userId = "ehehhehe";
+        String requestId = "danie";
+        Request req = new Request(id,"tritolo", "catory","subCategory",
+                "description",879879,6565);
+        Date date = new Date();
+        long timeCreation = date.getTime();
+
+        DatabaseReference ref = handyShopDB.child("feedback");
+        FeedBack feedback = new FeedBack(id, userId, requestId, timeCreation,
+                req.getTitle(), req.getCategory(), req.getSubCategory(), req.getDescription());
+            ref.push().setValue(feedback);
+        }
+
+
+
+    public void checkPending(View v){
+
+            final DatabaseReference ref = handyShopDB.child("feedback");
+            tmp=false;
+            Query queryRef = ref.orderByChild("yourId").equalTo(id);
+            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange (DataSnapshot snapshot){
+                if (snapshot.getChildrenCount() > 0)
+                {
+                    for (DataSnapshot d : snapshot.getChildren()) {
+                        FeedBack fdb = d.getValue(FeedBack.class);
+                        Date date = new Date();
+                        if(date.getTime()-fdb.getTimeCreation()>30000);
+                        addNotification(fdb);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled (DatabaseError f){
+            }
+        });
+        //return tmp;
+
+
+    }
+
+
+
+
+public void addNotification(FeedBack feedback){
+
+        Intent intent = new Intent(this, FeedbackActivity.class);
+        intent.putExtra("userId", feedback.getUserId());
+        intent.putExtra("requestId",feedback.getRequestId());
+        intent.putExtra("Category", feedback.getCategory());
+        intent.putExtra("SubCategory", feedback.getSubCategory());
+        intent.putExtra("userId", feedback.getUserId());
+        intent.putExtra("description", feedback.getDescription());
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle("Hello! You have to leave feedback")
+                .setContentText(feedback.getTitleRequest())
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
+
+
+    }
 
 }
 
