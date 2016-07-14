@@ -25,6 +25,13 @@
     <string name="seekbar_string_offer">Choice Distance Range</string>
     <string name="seekbar_string_request">Choice Distance Range</string>
 
+    <string name="leaveFeedback">Leave a Feedback</string>
+     <string name="title_req_feedback">Title</string>
+     <string name="description_request_feedback">Description</string>
+    <string name="category_feedback">Category</string>
+    <string name="subcategory_feedback">Sub Category</string>
+    <string name="username_feedback">User</string>
+
     <string-array name="category_arrays">
         <item>Rentals</item>
         <item>Tools</item>

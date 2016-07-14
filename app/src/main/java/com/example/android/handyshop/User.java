@@ -4,6 +4,9 @@ public class User {
     private String userId;
     private String name;
     private String email;
+    private double feedback;
+    private int transanctions;
+
 
     public User(String userId, String name,String email){
         this.userId=userId;
@@ -36,4 +39,20 @@ public class User {
     }
 
     public User() {}
+
+    public double getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(int feedback) {
+        this.feedback = feedback;
+    }
+
+    public int getTransanctions() {
+        return transanctions;
+    }
+
+    public void setTransanctions(int transanctions) {
+        this.transanctions = transanctions;
+    }
 }

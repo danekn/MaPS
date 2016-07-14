@@ -1222,6 +1222,7 @@ public void addNotification(FeedBack feedback){
                 .setContentText(feedback.getTitleRequest())
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
+                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
                 .build();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -1229,6 +1230,39 @@ public void addNotification(FeedBack feedback){
 
 
     }
+
+
+
+
+    public void leavefeedback(View v){
+/*
+        final DatabaseReference ref = handyShopDB.child("users");
+        tmp=false;
+        //Query queryRef = ref.orderByChild("userId").equalTo(userId);
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange (DataSnapshot snapshot){
+                if (snapshot.getChildrenCount() > 0)
+                {
+                    for (DataSnapshot d : snapshot.getChildren()) {
+                        FeedBack fdb = d.getValue(FeedBack.class);
+                        Date date = new Date();
+                        if(date.getTime()-fdb.getTimeCreation()>30000);
+                        addNotification(fdb);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled (DatabaseError f){
+            }
+        });
+
+*/
+
+    }
+
+
 
 }
 
