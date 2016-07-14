@@ -63,6 +63,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -99,6 +100,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.regex.Pattern;
 
 public class MainActivity extends FragmentActivity implements LocationListener {
     private int PICK_IMAGE_REQUEST = 1;
@@ -111,6 +113,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static Bitmap bitmap;
 
     static CustomViewPager mViewPager;
+
 
     static double latitude;
     static double longitude;
@@ -191,6 +194,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         };
         accessToken = AccessToken.getCurrentAccessToken();
 
+        Profile profile = Profile.getCurrentProfile();
+        if(profile!=null) {
+            id = profile.getId();
+            checkPending();
+        }
 
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
@@ -199,6 +207,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         }
         nRequestList = new ArrayList<Request>();
         nOfferList=new ArrayList<Offer>();
+
+
     }
 
 
@@ -238,7 +248,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -249,6 +258,11 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     @Override
     public void onStart() {
         super.onStart();
+        Profile profile = Profile.getCurrentProfile();
+        if(profile!=null) {
+            id = profile.getId();
+            checkPending();
+        }
         client.connect();
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
@@ -392,8 +406,12 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 mgr.notify(NOTIFY_ME_ID, note);
                 */
 
+
+            }
+            else{
                 callbackManager.onActivityResult(requestCode, resultCode, data);
                 checkIfLogged(null);
+                checkPending();
             }
 
 
@@ -430,8 +448,9 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             ((MainActivity)getActivity()).checkIfLogged(rootView);
 
             Profile profile = Profile.getCurrentProfile();
-            if(profile!=null)
+            if(profile!=null) {
                 id = profile.getId();
+            }
 
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
@@ -459,7 +478,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                         public void onDataChange(DataSnapshot snapshot) {
 
                                             if (snapshot.getChildrenCount() == 0) {
-                                                User usr = new User(id, name, email);
+                                                User usr = new User(id, name, email, 0, 0);
                                                 ref.push().setValue(usr);
 
                                             } else
@@ -487,6 +506,26 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 @Override
                 public void onError(FacebookException exception) {
                     // App code
+                }
+            });
+
+            final DatabaseReference ref = handyShopDB.child("users");
+
+            Query queryRef = ref.orderByChild("userId").equalTo(id);
+            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange (DataSnapshot snapshot){
+                    if (snapshot.getChildrenCount() > 0) {
+                        for (DataSnapshot d : snapshot.getChildren()) {
+                            User usr = d.getValue(User.class);
+                            final RatingBar mBar = (RatingBar) rootView.findViewById(R.id.ratingBarProfile);
+                            mBar.setRating((float)usr.getFeedback());
+                        }
+                    }
+                }
+                @Override
+                public void onCancelled (DatabaseError f){
                 }
             });
 
@@ -844,21 +883,26 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         String type = (String) radioButton.getText();
         System.out.println(type);
 
+        //Get username Telegram
+        EditText usrTelegramField = (EditText) findViewById(R.id.usrTelegram);
+        String usrTelegram = usrTelegramField.getText().toString();
+
         switch (type) {
 
             case "Offer":
                 DatabaseReference ref = handyShopDB.child("offers");
-                Request req = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad);
+                Request req = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad, usrTelegram);
                 ref.push().setValue(req);
-
-                uploadImg(id,title);
+                if(bitmap!=null)
+                    uploadImg(id,title);
                 break;
 
             case "Request":
                 DatabaseReference re = handyShopDB.child("requests");
-                Request rq = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad);
+                Request rq = new Request(id, title, category, subcategory, description, latitudeRad, longitudeRad, usrTelegram);
                 re.push().setValue(rq);
-                uploadImg(id,title);
+                if(bitmap!=null)
+                    uploadImg(id,title);
                 break;
             default:
         }
@@ -879,7 +923,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                                                                 else {
                                                                     for (DataSnapshot d : snapshot.getChildren()) {
                                                                         Request req = d.getValue(Request.class);
-                                                                        addToList(activitiesList, req, 1);
+                                                                        addToList(activitiesList, req, 1, null);
 
                                                                     }
                                                                     adapteract.notifyDataSetChanged();
@@ -897,6 +941,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     public void uploadImg(String id, String title){
 
             imagesRef = storageRef.child("images/"+id+title+".jpeg");
+
             System.out.println(imagesRef);
             ImageView imageView= (ImageView) findViewById(R.id.imageGallery);
             imageView.setDrawingCacheEnabled(true);
@@ -998,7 +1043,7 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     }
 
 
-    public void addToList(ArrayList<Group> list, Request q, int i){
+    public void addToList(ArrayList<Group> list, Request q, int i, String key){
         double dist = computeDistance(q.getLatitude(), q.getLongitude(), latitudeRad, longitudeRad);
         Group group;
         if(i==0)
@@ -1010,6 +1055,9 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         group.children.add("DESCRIPTION: "+q.getDescription());
         //TODO prendere la mail dall id dell utente
         group.children.add("EMAIL: "+"email");
+        if(key!=null) {
+            group.children.add(q.getUsrTelegram() + "^" + q.getUserId() + "^" + q.getTitle() + "^" + q.getCategory() + "^" + q.getSubCategory() + "^" + q.getDescription());
+        }
         list.add(list.size(), group);
     }
 
@@ -1046,13 +1094,16 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                         if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
                             if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category))){
                                 if (type=="requests"){
+                                    if(nRequestList!=null)
                                     nRequestList.add(req);
                                 }
                                 else {
                                     Offer off = d.getValue(Offer.class);
-                                    nOfferList.add(off);
+                                    if(nOfferList!=null)
+                                        nOfferList.add(off);
                                 }
-                                addToList(list, req, 0);
+
+                                addToList(list, req, 0, d.getKey());
                             }
 
                         }
@@ -1135,54 +1186,38 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     }
 
+    public void saveFeedback(String req) {
 
-    public void telecazzo(View v) {
-       /* Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, "addresses");
-
-        setResult(DELETE_ITEM, intent);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), DELETE_ITEM);
-
-
-        }*/
-        Intent telegram = new Intent(Intent.ACTION_VIEW , Uri.parse("https://telegram.me/Porcodio"));
-        startActivity(telegram);
-    }
-
-    public void saveFeedback(View v) {
-
-        String userId = "ehehhehe";
-        String requestId = "danie";
-        Request req = new Request(id,"tritolo", "catory","subCategory",
-                "description",879879,6565);
+        String[] all = req.split(Pattern.quote("^"));
         Date date = new Date();
         long timeCreation = date.getTime();
 
         DatabaseReference ref = handyShopDB.child("feedback");
-        FeedBack feedback = new FeedBack(id, userId, requestId, timeCreation,
-                req.getTitle(), req.getCategory(), req.getSubCategory(), req.getDescription());
+        System.out.println("dddddd"+all[0]);
+        FeedBack feedback = new FeedBack(id, all[1], timeCreation,
+                all[2], all[3], all[4], all[5]);
             ref.push().setValue(feedback);
         }
 
 
 
-    public void checkPending(View v){
+    public void checkPending(){
 
             final DatabaseReference ref = handyShopDB.child("feedback");
-            tmp=false;
+
             Query queryRef = ref.orderByChild("yourId").equalTo(id);
             queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange (DataSnapshot snapshot){
                 if (snapshot.getChildrenCount() > 0)
                 {
+                    int i=0;
                     for (DataSnapshot d : snapshot.getChildren()) {
                         FeedBack fdb = d.getValue(FeedBack.class);
                         Date date = new Date();
                         if(date.getTime()-fdb.getTimeCreation()>30000);
-                        addNotification(fdb);
+                            i++;
+                        addNotification(fdb,i,d.getKey());
                     }
                 }
             }
@@ -1191,30 +1226,27 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             public void onCancelled (DatabaseError f){
             }
         });
-        //return tmp;
-
-
     }
 
 
 
 
-public void addNotification(FeedBack feedback){
+public void addNotification(FeedBack feedback,int i, String key){
 
         Intent intent = new Intent(this, FeedbackActivity.class);
         intent.putExtra("userId", feedback.getUserId());
-        intent.putExtra("requestId",feedback.getRequestId());
+        intent.putExtra("key", key);
+        intent.putExtra("titleReq",feedback.getTitleRequest());
         intent.putExtra("Category", feedback.getCategory());
         intent.putExtra("SubCategory", feedback.getSubCategory());
-        intent.putExtra("userId", feedback.getUserId());
         intent.putExtra("description", feedback.getDescription());
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, uniqueInt, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
@@ -1222,47 +1254,51 @@ public void addNotification(FeedBack feedback){
                 .setContentText(feedback.getTitleRequest())
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
-                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+                //.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
                 .build();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notification);
+        notificationManager.notify(i, notification);
 
 
+    }
+    public void contactUsr(View v){
+        LinearLayout layout=(LinearLayout)v.getParent();
+        TextView child = (TextView)layout.getChildAt(0);
+        String usr = child.getText().toString();
+        String[] username = usr.split(Pattern.quote("^"));
+        System.out.println("CAZZOOO: "+username[0]+username[1]);
+        Intent telegram = new Intent(Intent.ACTION_VIEW , Uri.parse("https://telegram.me/"+username[0]));
+        startActivity(telegram);
+        saveFeedback(child.getText().toString());
     }
 
 
 
+    public void goActivitiesFragment(View v){
 
-    public void leavefeedback(View v){
-/*
-        final DatabaseReference ref = handyShopDB.child("users");
-        tmp=false;
-        //Query queryRef = ref.orderByChild("userId").equalTo(userId);
-        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange (DataSnapshot snapshot){
-                if (snapshot.getChildrenCount() > 0)
-                {
-                    for (DataSnapshot d : snapshot.getChildren()) {
-                        FeedBack fdb = d.getValue(FeedBack.class);
-                        Date date = new Date();
-                        if(date.getTime()-fdb.getTimeCreation()>30000);
-                        addNotification(fdb);
-                    }
-                }
-            }
+        mViewPager.setCurrentItem(0);
+    }
 
-            @Override
-            public void onCancelled (DatabaseError f){
-            }
-        });
+    public void goHomeFragment(View v){
 
-*/
+        mViewPager.setCurrentItem(1);
+    }
 
+    public void goRequestFragment(View v){
+
+        mViewPager.setCurrentItem(2);
     }
 
 
+    public void goOffersFragment(View v){
+        mViewPager.setCurrentItem(3);
+    }
+
+    public void goInsertFragment(View v){
+
+        mViewPager.setCurrentItem(4);
+    }
 
 }
 

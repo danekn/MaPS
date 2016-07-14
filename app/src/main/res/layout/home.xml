@@ -2,7 +2,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/background_handyshop"
     android:baselineAligned="false"
     android:alpha="1"
     android:gravity="bottom|left"
@@ -48,6 +47,15 @@
             android:gravity="center"
             />
 
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ratingBarProfile"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:isIndicator="true"/>
+
+
     </LinearLayout>
 
     <GridLayout
@@ -63,8 +71,8 @@
 
         <Button
             style="@style/Widget.AppCompat.Button.Colored"
-            android:text="NOti fica"
-            android:onClick="addNotification"
+            android:text="Your Activities"
+            android:onClick="goActivitiesFragment"
             android:id="@+id/insert_button"
             android:layout_width="150dp"/>
 
@@ -73,25 +81,26 @@
 
             android:layout_height="match_parent"
             android:layout_width="150dp"
-            android:text="Open Telegram"
+            android:text="Insert"
+            android:onClick="goInsertFragment"
             android:id="@+id/telegram_chat"
-            android:onClick="telecazzo" />
+             />
 
         <Button
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="150dp"
             android:layout_height="match_parent"
-            android:text="saveFeedback"
-            android:onClick="saveFeedback"
+            android:text="Requests"
+            android:onClick="goRequestFragment"
             android:id="@+id/upload"
              />
         <Button
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="150dp"
             android:layout_height="match_parent"
-            android:text="Check feddback pendenti"
+            android:text="Offers"
             android:id="@+id/download_img"
-            android:onClick="checkPending"
+            android:onClick="goOffersFragment"
 
         />
     </GridLayout>

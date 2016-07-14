@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:clickable="true"
+    android:orientation="vertical"
+    android:paddingLeft="40dp"
+    android:paddingRight="40dp"
+    tools:context=".MainActivity" >
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:drawablePadding="5dp"
+        android:gravity="center_vertical"
+        android:visibility="invisible">
+    </TextView>
+    <ImageButton
+        android:id="@+id/contactUsrButton"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:background="@null"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/telegram"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="contactUsr"/>
+
+</LinearLayout>

@@ -10,8 +10,9 @@ public class Request implements Serializable {
     private String description;
     private double latitude;
     private double longitude;
+    private String usrTelegram;
 
-    public Request(String userId,String title, String category,String subCategory, String description,double latitude,double longitude){
+    public Request(String userId,String title, String category,String subCategory, String description,double latitude,double longitude, String usrTelegram){
         this.userId=userId;
         this.title=title;
         this.category=category;
@@ -19,6 +20,7 @@ public class Request implements Serializable {
         this.description=description;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.usrTelegram=usrTelegram;
 
 }
 
@@ -36,6 +38,14 @@ public class Request implements Serializable {
 
     public String getSubCategory() {
         return subCategory;
+    }
+
+    public String getUsrTelegram() {
+        return usrTelegram;
+    }
+
+    public void setUsrTelegram(String usrTelegram) {
+        this.usrTelegram = usrTelegram;
     }
 
     public String getTitle() {
@@ -75,8 +85,6 @@ public class Request implements Serializable {
     public double getLatitude(){
         return latitude;
     }
-
-
 
     public Request() {
     }

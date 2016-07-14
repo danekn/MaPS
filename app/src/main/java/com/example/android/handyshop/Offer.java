@@ -10,8 +10,9 @@ public class Offer implements Serializable{
     private String description;
     private double latitude;
     private double longitude;
+    private String usrTelegram;
 
-    public Offer(String userId, String title, String category, String subCategory, String description, double latitude, double longitude){
+    public Offer(String userId, String title, String category, String subCategory, String description, double latitude, double longitude, String usrTelegram){
         this.userId=userId;
         this.title=title;
         this.category=category;
@@ -19,6 +20,7 @@ public class Offer implements Serializable{
         this.description=description;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.usrTelegram=usrTelegram;
 
 }
 
@@ -74,6 +76,14 @@ public class Offer implements Serializable{
 
     public double getLatitude(){
         return latitude;
+    }
+
+    public String getUsrTelegram() {
+        return usrTelegram;
+    }
+
+    public void setUsrTelegram(String usrTelegram) {
+        this.usrTelegram = usrTelegram;
     }
 
 

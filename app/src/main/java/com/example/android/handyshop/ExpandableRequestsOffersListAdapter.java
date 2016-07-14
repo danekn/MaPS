@@ -51,6 +51,18 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
     }
 
     @Override
+    public int getChildType(int groupPosition, int childPosition){
+        if(childPosition==4)
+            return 1;
+        return 0;
+    }
+
+    @Override
+    public int getChildTypeCount(){
+        return 2;
+    }
+
+    @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         final String children = (String) getChild(groupPosition, childPosition);
@@ -58,12 +70,21 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
         if (convertView==null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            convertView = inflater.inflate(R.layout.listrow_details_content, null);
+            if(getChildType(groupPosition,childPosition)==0)
+                convertView = inflater.inflate(R.layout.listrow_details_content, null);
+            else
+                convertView = inflater.inflate(R.layout.listrow_details_content_button, null);
 
         }
+        if(getChildType(groupPosition,childPosition)==0) {
 
-        TextView description = (TextView) convertView.findViewById(R.id.detail);
-        description.setText(children);
+            TextView description = (TextView) convertView.findViewById(R.id.detail);
+            description.setText(children);
+        }
+        else{
+            TextView username = (TextView) convertView.findViewById(R.id.username);
+            username.setText(children);
+        }
 
         return convertView;
     }
@@ -126,6 +147,9 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
             @Override
             public void onFailure(@NonNull Exception exception) {
                 System.out.println("ERRORE!!!! "+imagesRef);
+                Bitmap bmp = BitmapFactory.decodeResource(context.getResources(),
+                        R.drawable.noimageicon);
+                imageView.setImageBitmap(bmp);
             }
         });
         return convertView;

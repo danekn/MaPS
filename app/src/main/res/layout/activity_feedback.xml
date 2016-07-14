@@ -101,18 +101,7 @@
         android:gravity="bottom"
         android:layout_alignParentBottom="true">
 
-    <Button
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Back Home"
-        android:id="@+id/backHome"
-        android:onClick="backHome"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_gravity="left"
-        android:layout_marginTop="5dp">
-    </Button>
+
         <Button
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
@@ -121,7 +110,7 @@
             android:id="@+id/leaveFeedback"
             android:onClick="leaveFeedback"
             android:orientation="horizontal"
-            android:layout_gravity="right"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp">
         </Button>
 

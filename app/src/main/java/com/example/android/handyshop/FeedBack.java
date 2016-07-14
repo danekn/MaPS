@@ -9,7 +9,6 @@ import java.util.Calendar;
 public class FeedBack {
     private String yourId;
     private String userId;
-    private String requestId;
     private long timeCreation;
     private String titleRequest;
     private String category;
@@ -48,20 +47,12 @@ public class FeedBack {
         this.description = description;
     }
 
-    public void setRequestId(String requestId) {
-        requestId = requestId;
-    }
-
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
     public String getUserId() {
         return userId;
-    }
-
-    public String getRequestId() {
-        return requestId;
     }
 
     public String getYourId() {
@@ -80,11 +71,10 @@ public class FeedBack {
         this.timeCreation = timeCreation;
     }
 
-    public FeedBack(String yourId, String userId, String requestId, long timeCreation,
+    public FeedBack(String yourId, String userId, long timeCreation,
                     String titleRequest, String category, String subCategory, String description) {
         this.yourId = yourId;
         this.userId = userId;
-        this.requestId = requestId;
         this.timeCreation = timeCreation;
         this.titleRequest = titleRequest;
         this.category = category;
