@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.example.android.handyshop"
         minSdkVersion 21
-        targetSdkVersion 23
+        targetSdkVersion 21
         multiDexEnabled true
 
     }

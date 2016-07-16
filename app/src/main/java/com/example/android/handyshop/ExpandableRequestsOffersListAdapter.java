@@ -13,6 +13,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -21,6 +22,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StreamDownloadTask;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapter {
 
@@ -54,12 +56,14 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
     public int getChildType(int groupPosition, int childPosition){
         if(childPosition==4)
             return 1;
+        if(childPosition==3)
+            return 2;
         return 0;
     }
 
     @Override
     public int getChildTypeCount(){
-        return 2;
+        return 3;
     }
 
     @Override
@@ -72,8 +76,10 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
 
             if(getChildType(groupPosition,childPosition)==0)
                 convertView = inflater.inflate(R.layout.listrow_details_content, null);
-            else
+            if(getChildType(groupPosition,childPosition)==1)
                 convertView = inflater.inflate(R.layout.listrow_details_content_button, null);
+            if(getChildType(groupPosition,childPosition)==2)
+                convertView = inflater.inflate(R.layout.listrow_details_ratingbar, null);
 
         }
         if(getChildType(groupPosition,childPosition)==0) {
@@ -81,9 +87,14 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
             TextView description = (TextView) convertView.findViewById(R.id.detail);
             description.setText(children);
         }
-        else{
+        if(getChildType(groupPosition,childPosition)==1) {
             TextView username = (TextView) convertView.findViewById(R.id.username);
             username.setText(children);
+        }
+        if(getChildType(groupPosition,childPosition)==2) {
+            RatingBar rbar = (RatingBar) convertView.findViewById(R.id.ratingBarList);
+            double feedback =Double.parseDouble(children.toString());
+            rbar.setRating((float)(feedback));
         }
 
         return convertView;
@@ -129,12 +140,13 @@ public class ExpandableRequestsOffersListAdapter extends BaseExpandableListAdapt
         }
         Group group = (Group) getGroup(groupPosition);
         final Bitmap bmp;
+        String[] keyAndfeedback = group.string.split(Pattern.quote("^"));
         CheckedTextView title = (CheckedTextView)convertView.findViewById(R.id.textView1);
-        int i = group.string.indexOf("?");
-        final String t = group.string.substring(0,i);
+        int i = keyAndfeedback[0].indexOf("?");
+        final String t = keyAndfeedback[0].substring(0,i);
         final ImageView imageView= (ImageView) convertView.findViewById(R.id.imageReqOff);
-        title.setText(t+group.string.substring(i+1,group.string.length()));
-        final StorageReference imagesRef = (MainActivity.storageRef).child("images/"+MainActivity.id+t+".jpeg");
+        title.setText(t+keyAndfeedback[0].substring(i+1,keyAndfeedback[0].length()));
+        final StorageReference imagesRef = (MainActivity.storageRef).child("images/"+keyAndfeedback[1]+t+".jpeg");
         imagesRef.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {

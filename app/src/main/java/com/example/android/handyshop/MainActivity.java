@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -22,12 +23,14 @@ import java.util.Arrays;
 
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -139,6 +142,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     static AccessTokenTracker accessTokenTracker = null;
     private GoogleApiClient client;
 
+    private LocationManager locationManager=null;
+
+    private Location mLocation;
+
     static boolean tmp;
 
 
@@ -148,8 +155,10 @@ public class MainActivity extends FragmentActivity implements LocationListener {
         setContentView(R.layout.activity_main);
         onNewIntent(getIntent());
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 100, this);
+
 
         myCollectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
@@ -214,7 +223,6 @@ public class MainActivity extends FragmentActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-
 
         latitude = (location.getLatitude());
         latitudeRad = (latitude * Math.PI) / 180;
@@ -450,6 +458,8 @@ public class MainActivity extends FragmentActivity implements LocationListener {
             Profile profile = Profile.getCurrentProfile();
             if(profile!=null) {
                 id = profile.getId();
+                TextView profileName =(TextView) rootView.findViewById(R.id.profile_name);
+                profileName.setText(profile.getFirstName());
             }
 
             LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -1043,27 +1053,49 @@ public class MainActivity extends FragmentActivity implements LocationListener {
     }
 
 
-    public void addToList(ArrayList<Group> list, Request q, int i, String key){
+    public void addToList(ArrayList<Group> list, final Request q, int i, final String key){
         double dist = computeDistance(q.getLatitude(), q.getLongitude(), latitudeRad, longitudeRad);
-        Group group;
+        final Group group;
         if(i==0)
-            group = new Group(q.getTitle() +"?"+ "  " + (Math.floor(dist * 100) / 100) + " Km");
+            group = new Group(q.getTitle() +"?"+ "  " + (Math.floor(dist * 100) / 100) + " Km" + "^" +q.getUserId());
         else
             group = new Group(q.getTitle());
         group.children.add("CATEGORY: "+q.getCategory());
         group.children.add("SUBCATEGORY: "+q.getSubCategory());
         group.children.add("DESCRIPTION: "+q.getDescription());
-        //TODO prendere la mail dall id dell utente
-        group.children.add("EMAIL: "+"email");
-        if(key!=null) {
-            group.children.add(q.getUsrTelegram() + "^" + q.getUserId() + "^" + q.getTitle() + "^" + q.getCategory() + "^" + q.getSubCategory() + "^" + q.getDescription());
-        }
+
+
+
+        final DatabaseReference ref = handyShopDB.child("users");
+        Query queryRef = ref.orderByChild("userId").equalTo(q.getUserId());
+        queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange (DataSnapshot snapshot){
+                if (snapshot.getChildrenCount() > 0)
+                {
+                    for (DataSnapshot d : snapshot.getChildren()) {
+                        User usr = d.getValue(User.class);
+                        if(key!=null) {
+                            group.children.add(String.valueOf(usr.getFeedback()));
+                            group.children.add(q.getUsrTelegram() + "^" + q.getUserId() + "^" + q.getTitle() + "^" + q.getCategory() + "^" + q.getSubCategory() + "^" + q.getDescription()+"^"+usr.getEmail());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled (DatabaseError f){
+            }
+        });
+
         list.add(list.size(), group);
     }
 
     public void updateList(final String type, final ExpandableRequestsOffersListAdapter adapter, final ArrayList<Group> list, Spinner spinner){
         final String text_category = spinner.getSelectedItem().toString();
     System.out.println(type);
+
         if(type=="requests") {
             ls = computeRadius(latitudeRad, longitudeRad, RadiusRequest);
             nOfferList=null;
@@ -1091,23 +1123,26 @@ public class MainActivity extends FragmentActivity implements LocationListener {
                 else {
                     for (DataSnapshot d : snapshot.getChildren()) {
                         Request req = d.getValue(Request.class);
-                        if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
-                            if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category))){
-                                if (type=="requests"){
-                                    if(nRequestList!=null)
-                                    nRequestList.add(req);
-                                }
-                                else {
-                                    Offer off = d.getValue(Offer.class);
-                                    if(nOfferList!=null)
-                                        nOfferList.add(off);
+                        if (id.equals(req.getUserId())==false) {
+
+                            if (req.getLongitude() <= ls.getMaxLon() && req.getLongitude() >= ls.getMinLon()) {
+                                if (text_category.equals("All") || (!text_category.equals("All") && req.getCategory().equals(text_category))) {
+                                    if (type == "requests") {
+                                        if (nRequestList != null)
+                                            nRequestList.add(req);
+                                        System.out.println("XXXX");
+                                    } else {
+                                        Offer off = d.getValue(Offer.class);
+                                        if (nOfferList != null)
+                                            nOfferList.add(off);
+                                    }
+
+                                    addToList(list, req, 0, d.getKey());
                                 }
 
-                                addToList(list, req, 0, d.getKey());
                             }
 
                         }
-
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -1263,7 +1298,7 @@ public void addNotification(FeedBack feedback,int i, String key){
 
     }
     public void contactUsr(View v){
-        LinearLayout layout=(LinearLayout)v.getParent();
+       RelativeLayout layout=(RelativeLayout)v.getParent();
         TextView child = (TextView)layout.getChildAt(0);
         String usr = child.getText().toString();
         String[] username = usr.split(Pattern.quote("^"));
@@ -1271,6 +1306,37 @@ public void addNotification(FeedBack feedback,int i, String key){
         Intent telegram = new Intent(Intent.ACTION_VIEW , Uri.parse("https://telegram.me/"+username[0]));
         startActivity(telegram);
         saveFeedback(child.getText().toString());
+    }
+
+    public void sendMail(View v){
+
+        RelativeLayout layout=(RelativeLayout)v.getParent();
+        TextView child = (TextView)layout.getChildAt(0);
+        String usr = child.getText().toString();
+        String[] email = usr.split(Pattern.quote("^"));
+
+        Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+        sendIntent.setType("plain/text");
+        sendIntent.setData(Uri.parse(email[6]));
+        sendIntent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
+        sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { email[6]});
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "test");
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Hello. this is a message sent from Handy Shop App :-)");
+        startActivity(sendIntent);
+
+
+
+
+        /*Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, "danekun@me.com");
+
+        setResult(DELETE_ITEM, intent);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), DELETE_ITEM);
+
+*/
+
     }
 
 
@@ -1299,6 +1365,11 @@ public void addNotification(FeedBack feedback,int i, String key){
 
         mViewPager.setCurrentItem(4);
     }
+
+
+
+
+
 
 }
 

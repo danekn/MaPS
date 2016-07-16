@@ -14,6 +14,7 @@
         android:layout_alignParentLeft="true"
         android:text="Test"
         android:textSize="17sp"
+        android:textColor="#455A64"
         />
 
     <ImageButton
@@ -24,7 +25,8 @@
         android:layout_alignParentRight="true"
         android:src="@drawable/delete_icon"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:onClick="deleteChild"/>
 
 </RelativeLayout>

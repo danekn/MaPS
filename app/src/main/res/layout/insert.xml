@@ -6,16 +6,14 @@
     android:layout_height="wrap_content"
     tools:context=".MainActivity"
     android:orientation="vertical"
-    android:weightSum="0"
-    android:background="@drawable/insert"
-    android:nestedScrollingEnabled="true">
+    android:weightSum="0">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/type_insert"
         android:id="@+id/type_insert"
         android:textStyle="bold"
-        android:textColor="@color/md_black_1000">
+        android:textColor="#455A64">
 
     </TextView>
         <RadioGroup
@@ -28,21 +26,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/request_type"
+                android:textColor="#455A64"
                 android:checked="true" />
             <RadioButton
                 android:id="@+id/radioOffer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/offer_type"
+                android:textColor="#455A64"
                 android:layout_gravity="center_horizontal"/>
         </RadioGroup>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/md_black_1000"
+        android:id="@+id/usrTelegram"
+        android:hint="Telegram @username"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/title_insert"
         android:id="@+id/title_request"
+
         android:textStyle="bold"
-        android:textColor="@color/md_black_1000">
+        android:textColor="#455A64">
     </TextView>
     <EditText
         android:scrollbars = "vertical"
@@ -59,7 +68,7 @@
         android:text="@string/description_insert"
         android:id="@+id/textView"
         android:textStyle="bold"
-        android:textColor="@color/md_black_1000"/>
+        android:textColor="#455A64"/>
     <EditText
         android:scrollbars = "vertical"
         android:layout_width="match_parent"
@@ -77,20 +86,21 @@
         android:text="@string/category_sub_insert"
         android:id="@+id/editText3"
         android:textStyle="bold"
-        android:textColor="@color/md_black_1000"/>
+        android:textColor="#455A64"/>
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/category_choice"
         android:spinnerMode="dropdown"
         android:prompt="@string/category_prompt"
+        android:textColor="#455A64"
         android:entries="@array/category_arrays"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/subcategory_insert"
         android:id="@+id/textView2"
-        android:textColor="@color/md_black_1000"
+        android:textColor="#455A64"
         android:textStyle="bold"/>
     <Spinner
         android:layout_width="match_parent"
@@ -98,13 +108,8 @@
         android:id="@+id/subcategory_choice"
         android:spinnerMode="dropdown"
         android:prompt="@string/subcategory_prompt"
+        android:textColor="#455A64"
         android:entries="@array/category_arrays"/>
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/md_black_1000"
-        android:id="@+id/usrTelegram"
-        android:text="Username @Telegram" />
 
     <GridLayout
     android:layout_width="match_parent"

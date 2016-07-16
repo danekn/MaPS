@@ -14,15 +14,16 @@
         android:text="@string/title_filter"
         android:id="@+id/filter_title"
         android:layout_weight="0.03"
-        android:textStyle="bold"/>
+        android:textColor="#455A64"/>
     <Spinner
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/category_choice_filter"
         android:layout_weight="0.03"
         android:spinnerMode="dropdown"
         android:prompt="@string/category_prompt"
-        android:entries="@array/category_arrays_filter"/>
+        android:entries="@array/category_arrays_filter"
+        android:textColor="#455A64"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,7 +31,7 @@
         android:text="@string/seekbar_string_offer"
         android:id="@+id/seekbar_title_offer"
         android:layout_weight="0.03"
-        android:textStyle="bold"/>
+        android:textColor="#455A64"/>
 
     <SeekBar
         android:layout_width="fill_parent"
@@ -44,6 +45,7 @@
         android:text="@string/offer_expandable"
         android:id="@+id/expandable_title_offer"
         android:layout_weight="0.03"
+        android:textColor="#455A64"
         android:textStyle="bold"/>
 
     <ExpandableListView
@@ -51,7 +53,8 @@
         android:layout_width="match_parent"
         android:layout_height="226dp"
         android:groupIndicator="@null"
-        android:layout_weight="0.80">
+        android:layout_weight="0.80"
+        >
     </ExpandableListView>
 
     <Button
